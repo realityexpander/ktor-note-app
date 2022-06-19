@@ -2,6 +2,8 @@ package com.realityexpander.data
 
 import com.realityexpander.data.collections.Note
 import com.realityexpander.data.collections.User
+import org.litote.kmongo.MongoOperator
+import org.litote.kmongo.contains
 import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.eq
 import org.litote.kmongo.reactivestreams.KMongo
@@ -16,17 +18,36 @@ suspend fun registerUser(user: User): Boolean {
 }
 
 suspend fun checkIfUserExists(email: String): Boolean {
-    // SELECT * FROM user WHERE email = :$email  // SQL would look like this
+    // SQL would look like this:
+    // SELECT * FROM user WHERE email = :$email
 
-    // return users.findOne("{ email: '$email' }") != null  // text based query
+    // json text based query:
+    // return users.findOne("{ email: '$email' }") != null
 
-    if(users.findOne("{ email: '$email' }") != null) {
-     println("User exists")
-    }
-
-    return users.findOne(User::email eq email) != null // object based query
+    // object::based query
+    return users.findOne(User::email eq email) != null
 }
 
 suspend fun checkPasswordForEmail(email: String, passwordToCheck: String): Boolean {
-    return users.findOne(User::email eq email)?.password == passwordToCheck
+    return users.findOne(User::email eq email)
+        ?.password == passwordToCheck
+}
+
+suspend fun getNotesForUser(email: String): List<Note> {
+    val id = users.findOne(User::email eq email)?.id
+
+    // json text based query
+    //return notes.find("{ owners: { \$elemMatch: { \$eq: '$id' } } }").toList()
+
+    // json text based query w/ mongo operators
+    // return notes.find("""
+    //  {
+    //      'owners': {
+    //          '${MongoOperator.elemMatch}': { '${MongoOperator.eq}': '$id'}
+    //     }
+    //  }
+    //  """).toList()
+
+    // object::based query
+    return notes.find(Note::owners contains id).toList() // text based query
 }

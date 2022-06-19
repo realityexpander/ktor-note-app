@@ -86,7 +86,7 @@ fun Route.loginRoute() {
     }
 }
 
-suspend fun ApplicationCall.respondPlatform(
+private suspend fun ApplicationCall.respondPlatform(
     isFromWeb: Boolean,
     response: SimpleResponse
 ) {
@@ -146,7 +146,7 @@ private suspend fun respondLoginRawHTML(call: ApplicationCall) {
     }
 }
 
-suspend fun respondLoginDslHtml(call: ApplicationCall) {
+private suspend fun respondLoginDslHtml(call: ApplicationCall) {
     call.respondHtml {
         head {
             title { +"Login" }

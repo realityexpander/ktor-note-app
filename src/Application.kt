@@ -5,6 +5,7 @@ import com.realityexpander.data.checkPasswordForEmail
 import com.realityexpander.data.collections.User
 import com.realityexpander.data.registerUser
 import com.realityexpander.routes.loginRoute
+import com.realityexpander.routes.notesRoute
 import com.realityexpander.routes.registerRoute
 import io.ktor.application.*
 import io.ktor.auth.*
@@ -27,6 +28,7 @@ fun Application.module(testing: Boolean = false) {
     install(Routing) {           // Our routes are defined in routes.kt
         registerRoute()
         loginRoute()
+        notesRoute()
     }
     install(ContentNegotiation){  // serialize JSON
         gson {
@@ -53,6 +55,7 @@ private fun Authentication.Configuration.configureAuth() {
             val email = credentials.name
             val password = credentials.password
 
+            // Check in database if user exists & password is correct
             if (checkPasswordForEmail(email, password)) {
                 UserIdPrincipal(email)
             } else {
