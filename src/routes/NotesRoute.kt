@@ -90,7 +90,7 @@ private suspend fun PipelineContext<Unit, ApplicationCall>.getNotesRequest(
                 isFromWeb,
                 SimpleResponseWithData<List<Note>>(
                     successful = true, statusCode = HttpStatusCode.OK,
-                    message = "${notes.size} notes found",
+                    message = "${notes.size} note${addPostfixS(notes)} found",
                     data = notes
                 )
             )
@@ -162,7 +162,7 @@ private suspend fun ApplicationCall.respondRawHTML(
                         <h2>
                             <div class="status">
                                 <br>
-                                <p>${response.message}</p>
+                                <p>Message from server: ${response.message}</p>
                                 ${if (!response.successful) "<br><p>Response code: ${response.statusCode}</p>" else ""}
                                 <br>
                             </div>
@@ -193,7 +193,7 @@ private fun renderNotes(response: SimpleResponseWithData<*>) =
         @Suppress("UNCHECKED_CAST") // we know it's a List<Note>
         (response.data as? List<Note>)?.let {
         """
-            <p>${it.size} note${if (it.size > 1) "s" else ""} found</p>
+            <p>${it.size} note${addPostfixS(it)} found</p>
             <ul>
             ${
                 it.map { note ->
@@ -213,3 +213,7 @@ private fun renderNotes(response: SimpleResponseWithData<*>) =
         } ?: ""
     }                                   
 """.trimIndent()
+
+// Add s to the end of the string if it's not 1
+private fun addPostfixS(it: List<Note>) =
+    if (it.size > 1) "s" else ""
