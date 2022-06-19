@@ -1,11 +1,13 @@
 package com.realityexpander
 
 import com.realityexpander.data.checkIfUserExists
+import com.realityexpander.data.checkPasswordForEmail
 import com.realityexpander.data.collections.User
 import com.realityexpander.data.registerUser
 import com.realityexpander.routes.loginRoute
 import com.realityexpander.routes.registerRoute
 import io.ktor.application.*
+import io.ktor.auth.*
 import io.ktor.features.*
 import io.ktor.gson.*
 import io.ktor.routing.*
@@ -31,6 +33,9 @@ fun Application.module(testing: Boolean = false) {
             setPrettyPrinting()
         }
     }
+    install(Authentication) {
+        configureAuth()
+    }
 
 
 //    Testing
@@ -40,3 +45,19 @@ fun Application.module(testing: Boolean = false) {
 
 }
 
+// Setup basic authentication using email and password
+private fun Authentication.Configuration.configureAuth() {
+    basic {
+        realm = "Note Server"
+        validate { credentials ->
+            val email = credentials.name
+            val password = credentials.password
+
+            if (checkPasswordForEmail(email, password)) {
+                UserIdPrincipal(email)
+            } else {
+                null
+            }
+        }
+    }
+}
