@@ -21,10 +21,15 @@ fun Route.notesRoute() {
 
     get("/notes") {
         // val notes = getNotesForUser(call.parameters["email"] ?: "")
-        isFromWeb = true
 
         val request = try {
-            NotesRequest(email = call.parameters["email"]!!) // coming from the web
+            if(call.request.queryParameters["email"] != null) {
+                isFromWeb = true
+                NotesRequest(email = call.parameters["email"]!!) // coming from the web (query params)
+            } else {
+                isFromWeb = false
+                call.receive<NotesRequest>()  // coming from mobile app (body json)
+            }
         } catch (e: ContentTransformationException) {
             call.respondPlatform(
                 isFromWeb,
@@ -48,33 +53,33 @@ fun Route.notesRoute() {
         getNotesRequest(request, isFromWeb)
     }
 
-    post("/notes") {
-
-        // Get the registration parameters
-        val request = try {
-            call.receive<NotesRequest>()  // coming from mobile app
-        } catch (e: ContentTransformationException) {
-            call.respondPlatform(
-                isFromWeb,
-                SimpleResponse(
-                    false, HttpStatusCode.BadRequest,
-                    "Error: ${e.localizedMessage}"
-                )
-            )
-            return@post
-        } catch (e: Exception) {
-            call.respondPlatform(
-                isFromWeb,
-                SimpleResponse(
-                    false, HttpStatusCode.NotAcceptable,
-                    "Error: ${e.localizedMessage}"
-                )
-            )
-            return@post
-        }
-
-        getNotesRequest(request, isFromWeb)
-    }
+//    post("/notes") {
+//
+//        // Get the registration parameters
+//        val request = try {
+//            call.receive<NotesRequest>()  // coming from mobile app (body json)
+//        } catch (e: ContentTransformationException) {
+//            call.respondPlatform(
+//                isFromWeb,
+//                SimpleResponse(
+//                    false, HttpStatusCode.BadRequest,
+//                    "Error: ${e.localizedMessage}"
+//                )
+//            )
+//            return@post
+//        } catch (e: Exception) {
+//            call.respondPlatform(
+//                isFromWeb,
+//                SimpleResponse(
+//                    false, HttpStatusCode.NotAcceptable,
+//                    "Error: ${e.localizedMessage}"
+//                )
+//            )
+//            return@post
+//        }
+//
+//        getNotesRequest(request, isFromWeb)
+//    }
 }
 
 private suspend fun PipelineContext<Unit, ApplicationCall>.getNotesRequest(
@@ -170,7 +175,7 @@ private suspend fun ApplicationCall.respondRawHTML(
                             <br>
                             ${
                                 if (response is SimpleResponseWithData<*>) {
-                                    renderNotes(response)
+                                    renderNotesList(response)
                                 } else ""
                             }
                         </h2>
@@ -183,7 +188,7 @@ private suspend fun ApplicationCall.respondRawHTML(
     }
 }
 
-private fun renderNotes(response: SimpleResponseWithData<*>) =
+private fun renderNotesList(response: SimpleResponseWithData<*>) =
 """
     <p>Data:</p>
     <code>
