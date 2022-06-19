@@ -51,7 +51,7 @@ fun Application.module(testing: Boolean = false) {
 
 }
 
-// Setup basic authentication using email and password
+// Setup "basic" authentication using email and password
 private fun Authentication.Configuration.configureAuth() {
     basic {
         realm = "Note Server"

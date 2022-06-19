@@ -318,8 +318,8 @@ private suspend fun ApplicationCall.respondRawHTML(
 }
 
 private suspend fun ApplicationCall.renderNotesListHTML(response: SimpleResponseWithData<*>) =
-"""
-    <p>Data:</p>
+    """
+    <p>Raw response data:</p>
     <code>
         ${response.data.toString()}
     </code>
@@ -327,8 +327,8 @@ private suspend fun ApplicationCall.renderNotesListHTML(response: SimpleResponse
     ${
         try {
             @Suppress("UNCHECKED_CAST") // we're pretty sure it's a `List<Note>`
-            (response.data as? List<Note>)?.let {
-                """
+            (response.data as? List<Note>)?.let { 
+            """
             <p>${it.size} note${addPostfixS(it)} found</p>
             <ul>
             <style>
@@ -355,10 +355,10 @@ private suspend fun ApplicationCall.renderNotesListHTML(response: SimpleResponse
                         <br>
                     </li>
                 """
-                    }.joinToString("")  // removes the [] from the markup
+                    }.joinToString("")  // removes the []'s from the markup
                 }
             </ul>
-        """.trimIndent()
+            """.trimIndent()
             } ?: ""
         } catch (e: Exception) {  // just in case the cast fails
             e.printStackTrace()
@@ -366,7 +366,7 @@ private suspend fun ApplicationCall.renderNotesListHTML(response: SimpleResponse
                     "an error occurred ${e.localizedMessage}</p><br>"
         }
     }                                   
-""".trimIndent()
+    """.trimIndent()
 
 // Add s to the end of the string if it's not 1
 private fun addPostfixS(it: List<Note>) =
