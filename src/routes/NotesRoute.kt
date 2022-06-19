@@ -50,39 +50,11 @@ fun Route.notesRoute() {
             return@get
         }
 
-        getNotesRequest(request, isFromWeb)
+        call.getNotesRequest(request, isFromWeb)
     }
-
-//    post("/notes") {
-//
-//        // Get the registration parameters
-//        val request = try {
-//            call.receive<NotesRequest>()  // coming from mobile app (body json)
-//        } catch (e: ContentTransformationException) {
-//            call.respondPlatform(
-//                isFromWeb,
-//                SimpleResponse(
-//                    false, HttpStatusCode.BadRequest,
-//                    "Error: ${e.localizedMessage}"
-//                )
-//            )
-//            return@post
-//        } catch (e: Exception) {
-//            call.respondPlatform(
-//                isFromWeb,
-//                SimpleResponse(
-//                    false, HttpStatusCode.NotAcceptable,
-//                    "Error: ${e.localizedMessage}"
-//                )
-//            )
-//            return@post
-//        }
-//
-//        getNotesRequest(request, isFromWeb)
-//    }
 }
 
-private suspend fun PipelineContext<Unit, ApplicationCall>.getNotesRequest(
+private suspend fun ApplicationCall.getNotesRequest(
     request: NotesRequest,
     isFromWeb: Boolean
 ) {
@@ -91,7 +63,7 @@ private suspend fun PipelineContext<Unit, ApplicationCall>.getNotesRequest(
         val notes = getNotesForUser(request.email)
 
         if (notes.isNotEmpty()) {
-            call.respondPlatform(
+            respondPlatform(
                 isFromWeb,
                 SimpleResponseWithData<List<Note>>(
                     successful = true, statusCode = HttpStatusCode.OK,
@@ -100,7 +72,7 @@ private suspend fun PipelineContext<Unit, ApplicationCall>.getNotesRequest(
                 )
             )
         } else {
-            call.respondPlatform(
+            respondPlatform(
                 isFromWeb,
                 SimpleResponseWithData<List<Note>>(
                     successful = true, statusCode = HttpStatusCode.OK,
@@ -110,7 +82,7 @@ private suspend fun PipelineContext<Unit, ApplicationCall>.getNotesRequest(
             )
         }
     } else {
-        call.respondPlatform(
+        respondPlatform(
             isFromWeb,
             SimpleResponse(
                 false, HttpStatusCode.NotFound,
