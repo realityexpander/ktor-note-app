@@ -131,6 +131,7 @@ private suspend fun ApplicationCall.respondPlatform(
     }
 }
 
+
 private suspend fun ApplicationCall.respondRawHTML(
     response: AppResponse =
         SimpleResponse(
@@ -190,14 +191,15 @@ private fun renderNotes(response: SimpleResponseWithData<*>) =
     </code>
     <br>
     ${
-        @Suppress("UNCHECKED_CAST") // we know it's a List<Note>
-        (response.data as? List<Note>)?.let {
-        """
+        try {
+            @Suppress("UNCHECKED_CAST") // we're pretty sure it's a `List<Note>`
+            (response.data as? List<Note>)?.let {
+                """
             <p>${it.size} note${addPostfixS(it)} found</p>
             <ul>
             ${
-                it.map { note ->
-                """
+                    it.map { note ->
+                        """
                     <li style="background-color: ${note.color}; list-style: decimal;">
                         title: ${note.title}
                         <br>
@@ -206,11 +208,16 @@ private fun renderNotes(response: SimpleResponseWithData<*>) =
                         date: ${note.date}
                     </li>
                 """
-                }.joinToString("")  // removes the [] from the markup
-            }
+                    }.joinToString("")  // removes the [] from the markup
+                }
             </ul>
         """.trimIndent()
-        } ?: ""
+            } ?: ""
+        } catch (e: Exception) {  // just in case the cast fails
+            e.printStackTrace()
+            "<br><p style=\"color:red; background-color:black;\">" +
+                    "an error occurred ${e.localizedMessage}</p><br>"
+        }
     }                                   
 """.trimIndent()
 
