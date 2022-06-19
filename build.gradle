@@ -11,7 +11,7 @@ buildscript {
 apply plugin: 'kotlin'
 apply plugin: 'application'
 
-group 'com.androiddevs'
+group 'com.realityexpander'
 version '0.0.1'
 mainClassName = "io.ktor.server.netty.EngineMain"
 
@@ -29,6 +29,7 @@ repositories {
     maven { url 'https://kotlin.bintray.com/kotlin-js-wrappers' }
 }
 
+// Compiling for JVM 1.8
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions {
         jvmTarget = "1.8"
@@ -42,12 +43,24 @@ dependencies {
     implementation "io.ktor:ktor-server-core:$ktor_version"
     implementation "io.ktor:ktor-html-builder:$ktor_version"
     testImplementation "io.ktor:ktor-server-tests:$ktor_version"
+
+    // Auth
     implementation "io.ktor:ktor-auth:$ktor_version"
+
+    // Serialization
     implementation "io.ktor:ktor-gson:$ktor_version"
+
+    // Mongo
     implementation 'org.litote.kmongo:kmongo:4.0.2'
     implementation 'org.litote.kmongo:kmongo-coroutine:4.0.2'
+
+    // Coroutines
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.7'
+
+    // Encryption / Security
     implementation 'commons-codec:commons-codec:1.14'
+
+    // Network
     implementation "io.ktor:ktor-network-tls:$ktor_version"
 }
 
