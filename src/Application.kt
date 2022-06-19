@@ -25,19 +25,23 @@ fun Application.module(testing: Boolean = false) {
 
     install(DefaultHeaders)      // Add default headers
     install(CallLogging)         // log call details
-    install(Routing) {           // Our routes are defined in routes.kt
-        registerRoute()
-        loginRoute()
-        notesRoute()
-    }
     install(ContentNegotiation){  // serialize JSON
         gson {
             setPrettyPrinting()
         }
     }
+
+    // Must setup authentication before setting up the Routes (or will crash)
     install(Authentication) {
         configureAuth()
     }
+
+    install(Routing) {           // Our routes are defined in routes.kt
+        registerRoute()
+        loginRoute()
+        notesRoute()
+    }
+
 
 
 //    Testing

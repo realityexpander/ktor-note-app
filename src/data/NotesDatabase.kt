@@ -36,10 +36,10 @@ suspend fun checkPasswordForEmail(email: String, passwordToCheck: String): Boole
 suspend fun getNotesForUser(email: String): List<Note> {
     val id = users.findOne(User::email eq email)?.id
 
-    // json text based query
+    // json text based query:
     //return notes.find("{ owners: { \$elemMatch: { \$eq: '$id' } } }").toList()
 
-    // json text based query w/ mongo operators
+    // json text based query w/ mongo operators:
     // return notes.find("""
     //  {
     //      'owners': {
@@ -48,6 +48,6 @@ suspend fun getNotesForUser(email: String): List<Note> {
     //  }
     //  """).toList()
 
-    // object::based query
+    // object::based query:
     return notes.find(Note::owners contains id).toList() // text based query
 }

@@ -8,22 +8,40 @@ import com.realityexpander.data.responses.AppResponse
 import com.realityexpander.data.responses.SimpleResponse
 import com.realityexpander.data.responses.SimpleResponseWithData
 import io.ktor.application.*
+import io.ktor.auth.*
 import io.ktor.html.*
 import io.ktor.http.*
+import io.ktor.http.HttpStatusCode.Companion.OK
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import io.ktor.util.pipeline.*
 import kotlinx.html.unsafe
 
 fun Route.notesRoute() {
-    var isFromWeb = false
 
+    // Authenticated get request to get all notes for a user
+    route("/getNotes") {
+        authenticate {
+            get {
+                val email = call.principal<UserIdPrincipal>()!!.name
+                val notes = getNotesForUser(email)
+                call.respond(OK,
+                    SimpleResponseWithData<List<Note>>(
+                        successful = true, statusCode = HttpStatusCode.OK,
+                        message = "${notes.size} note${addPostfixS(notes)} found",
+                        data = notes
+                    )
+                )
+            }
+        }
+    }
+
+    // Insecure get request to get all notes for a user (setup for testing)
     get("/notes") {
-        // val notes = getNotesForUser(call.parameters["email"] ?: "")
+        var isFromWeb = false
 
         val request = try {
-            if(call.request.queryParameters["email"] != null) {
+            if (call.request.queryParameters["email"] != null) {
                 isFromWeb = true
                 NotesRequest(email = call.parameters["email"]!!) // coming from the web (query params)
             } else {
