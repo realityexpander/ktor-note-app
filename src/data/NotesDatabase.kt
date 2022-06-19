@@ -2,7 +2,6 @@ package com.realityexpander.data
 
 import com.realityexpander.data.collections.Note
 import com.realityexpander.data.collections.User
-import org.litote.kmongo.MongoOperator
 import org.litote.kmongo.contains
 import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.eq
@@ -28,6 +27,10 @@ suspend fun checkIfUserExists(email: String): Boolean {
     return users.findOne(User::email eq email) != null
 }
 
+suspend fun getUser(email: String): User? {
+    return users.findOne(User::email eq email)
+}
+
 suspend fun checkPasswordForEmail(email: String, passwordToCheck: String): Boolean {
     return users.findOne(User::email eq email)
         ?.password == passwordToCheck
@@ -50,4 +53,19 @@ suspend fun getNotesForUser(email: String): List<Note> {
 
     // object::based query:
     return notes.find(Note::owners contains id).toList() // text based query
+}
+
+
+suspend fun saveNote(note: Note): Boolean {
+    if(note.id == null || note.id.isBlank()) {
+        return notes.insertOne(note).wasAcknowledged() // inserting will automatically set the id of the new note
+    }
+
+    val noteExists = notes.findOneById(note.id) != null
+
+    return if (noteExists) {
+        notes.updateOneById(note.id, note).wasAcknowledged()
+    } else {
+        notes.insertOne(note).wasAcknowledged()  // if note id is supplied, but doesn't exist, insert it anyway
+    }
 }

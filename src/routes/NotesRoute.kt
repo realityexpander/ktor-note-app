@@ -7,10 +7,13 @@ import com.realityexpander.data.requests.NotesRequest
 import com.realityexpander.data.responses.AppResponse
 import com.realityexpander.data.responses.SimpleResponse
 import com.realityexpander.data.responses.SimpleResponseWithData
+import com.realityexpander.data.saveNote
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.html.*
 import io.ktor.http.*
+import io.ktor.http.HttpStatusCode.Companion.BadRequest
+import io.ktor.http.HttpStatusCode.Companion.InternalServerError
 import io.ktor.http.HttpStatusCode.Companion.OK
 import io.ktor.request.*
 import io.ktor.response.*
@@ -32,6 +35,63 @@ fun Route.notesRoute() {
                         data = notes
                     )
                 )
+            }
+        }
+    }
+
+    route("/saveNote") {
+        authenticate {
+            post {
+                val note = try {
+                    call.receive<Note>()
+                } catch (e: Exception) {
+                    call.respond(
+                        OK,
+                        SimpleResponse(
+                            successful = false,
+                            statusCode = HttpStatusCode.BadRequest,
+                            message = "Invalid note format"
+                        )
+                    )
+                    return@post
+                }
+
+                val email = call.principal<UserIdPrincipal>()!!.name
+                val userExists = checkIfUserExists(email)
+                if (userExists) {
+                    val acknowledged = saveNote(note)
+
+                    if (acknowledged) {
+                        call.respond(
+                            OK,
+                            SimpleResponseWithData(
+                                successful = true,
+                                statusCode = OK,
+                                message = "Note added",
+                                data = note
+                            )
+                        )
+                    } else {
+                        call.respond(
+                            OK,
+                            SimpleResponseWithData(
+                                successful = false,
+                                statusCode = InternalServerError,
+                                message = "Note not added",
+                                data = note
+                            )
+                        )
+                    }
+                } else {
+                    call.respond(
+                        BadRequest,
+                        SimpleResponse(
+                            successful = false,
+                            statusCode = BadRequest,
+                            message = "User not found"
+                        )
+                    )
+                }
             }
         }
     }
