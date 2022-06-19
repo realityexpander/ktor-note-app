@@ -2,10 +2,6 @@ package com.realityexpander.data
 
 import com.realityexpander.data.collections.Note
 import com.realityexpander.data.collections.User
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.eq
 import org.litote.kmongo.reactivestreams.KMongo
@@ -29,4 +25,8 @@ suspend fun checkIfUserExists(email: String): Boolean {
     }
 
     return users.findOne(User::email eq email) != null // object based query
+}
+
+suspend fun checkPasswordForEmail(email: String, passwordToCheck: String): Boolean {
+    return users.findOne(User::email eq email)?.password == passwordToCheck
 }

@@ -41,12 +41,12 @@ fun Route.registerRoute() {
                         User( email = request.email, password = request.password)
                     )
                 ) {
-                    call.respond(Created, SimpleResponse(true, "User registered successfully"))
+                    call.respond(Created, SimpleResponse(true, message = "User registered successfully"))
                 } else {
-                    call.respond(NotAcceptable, SimpleResponse(false, "Error: User could not be registered"))
+                    call.respond(NotAcceptable, SimpleResponse(false, message = "Error: User could not be registered"))
                 }
             } else {
-                call.respond(Conflict, SimpleResponse(false, "Error: User/Email already exists"))
+                call.respond(Conflict, SimpleResponse(false, message = "Error: User/Email already exists"))
             }
         }
     }

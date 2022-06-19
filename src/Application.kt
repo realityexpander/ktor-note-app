@@ -3,6 +3,7 @@ package com.realityexpander
 import com.realityexpander.data.checkIfUserExists
 import com.realityexpander.data.collections.User
 import com.realityexpander.data.registerUser
+import com.realityexpander.routes.loginRoute
 import com.realityexpander.routes.registerRoute
 import io.ktor.application.*
 import io.ktor.features.*
@@ -23,6 +24,7 @@ fun Application.module(testing: Boolean = false) {
     install(CallLogging)         // log call details
     install(Routing) {           // Our routes are defined in routes.kt
         registerRoute()
+        loginRoute()
     }
     install(ContentNegotiation){  // serialize JSON
         gson {
