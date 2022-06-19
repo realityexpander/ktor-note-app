@@ -96,7 +96,7 @@ suspend fun ApplicationCall.respondPlatform(
             //call.respondRedirect("/")
         }
         false -> {
-            respond(response)
+            respond(response.statusCode, response)
         }
     }
 }

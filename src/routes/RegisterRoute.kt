@@ -9,7 +9,9 @@ import io.ktor.application.*
 import io.ktor.http.HttpStatusCode.Companion.BadRequest
 import io.ktor.http.HttpStatusCode.Companion.Conflict
 import io.ktor.http.HttpStatusCode.Companion.Created
-import io.ktor.http.HttpStatusCode.Companion.NotAcceptable
+import io.ktor.http.HttpStatusCode.Companion.ExpectationFailed
+import io.ktor.http.HttpStatusCode.Companion.InternalServerError
+import io.ktor.http.HttpStatusCode.Companion.PreconditionFailed
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
@@ -26,27 +28,51 @@ fun Route.registerRoute() {
 
             // Get the registration paramters
             val request = try {
-                 call.receive<AccountRequest>()
+                call.receive<AccountRequest>()
             } catch (e: ContentTransformationException) {
-                call.respond(BadRequest, "Error: ${e.localizedMessage}")
+                call.respond(
+                    ExpectationFailed,
+                    SimpleResponse(false, ExpectationFailed, message = "Error: ${e.localizedMessage}")
+                )
                 return@post
             } catch (e: Exception) {
-                call.respond(NotAcceptable, "Error: ${e.localizedMessage}")
+                call.respond(
+                    BadRequest,
+                    SimpleResponse(false, BadRequest, message = "Error: ${e.localizedMessage}")
+                )
                 return@post
             }
 
             val userExists = checkIfUserExists(request.email)
-            if(!userExists) {
-                if(registerUser(
-                        User( email = request.email, password = request.password)
+            if (!userExists) {
+
+                if (request.email.isBlank() || request.password.isBlank()) {
+                    call.respond(
+                        PreconditionFailed,
+                        SimpleResponse(false, PreconditionFailed, message = "Error: Email or password is blank")
+                    )
+                    return@post
+                }
+
+                if (registerUser(
+                        User(email = request.email, password = request.password)
                     )
                 ) {
-                    call.respond(Created, SimpleResponse(true, message = "User registered successfully"))
+                    call.respond(
+                        Created,
+                        SimpleResponse(true, Created, message = "User registered successfully")
+                    )
                 } else {
-                    call.respond(NotAcceptable, SimpleResponse(false, message = "Error: User could not be registered"))
+                    call.respond(
+                        InternalServerError,
+                        SimpleResponse(false, InternalServerError, message = "Error: User could not be registered")
+                    )
                 }
             } else {
-                call.respond(Conflict, SimpleResponse(false, message = "Error: User/Email already exists"))
+                call.respond(
+                    Conflict,
+                    SimpleResponse(false, Conflict, message = "Error: User/Email already exists")
+                )
             }
         }
     }
