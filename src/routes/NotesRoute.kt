@@ -1,13 +1,12 @@
 package com.realityexpander.routes
 
-import com.realityexpander.data.checkIfUserExists
+import com.realityexpander.data.*
 import com.realityexpander.data.collections.Note
-import com.realityexpander.data.getNotesForUser
+import com.realityexpander.data.requests.DeleteNoteRequest
 import com.realityexpander.data.requests.NotesRequest
-import com.realityexpander.data.responses.AppResponse
+import com.realityexpander.data.responses.BaseSimpleResponse
 import com.realityexpander.data.responses.SimpleResponse
 import com.realityexpander.data.responses.SimpleResponseWithData
-import com.realityexpander.data.saveNote
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.html.*
@@ -18,6 +17,7 @@ import io.ktor.http.HttpStatusCode.Companion.OK
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import kotlinx.coroutines.runBlocking
 import kotlinx.html.unsafe
 
 fun Route.notesRoute() {
@@ -79,6 +79,83 @@ fun Route.notesRoute() {
                                 statusCode = InternalServerError,
                                 message = "Note not added",
                                 data = note
+                            )
+                        )
+                    }
+                } else {
+                    call.respond(
+                        BadRequest,
+                        SimpleResponse(
+                            successful = false,
+                            statusCode = BadRequest,
+                            message = "User not found"
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    route("/deleteNote") {
+        authenticate { // Authenticated post request to delete a note
+            post {
+                val email = call.principal<UserIdPrincipal>()!!.name
+
+                val request = try {
+                    call.receive<DeleteNoteRequest>()
+                } catch (e: Exception) {
+                    call.respond(
+                        BadRequest,
+                        SimpleResponse(
+                            successful = false,
+                            statusCode = HttpStatusCode.BadRequest,
+                            message = "Invalid delete note format"
+                        )
+                    )
+                    return@post
+                }
+
+                val userExists = checkIfUserExists(email)
+                if (userExists) {
+                    val userId = getUser(email)!!.id
+
+                    // Only delete the note for this userId
+                    val acknowledged = deleteNoteForUserId(userId, request.id)
+
+                    if (acknowledged) {
+                        // Check if note still exists (ie: only an owner was removed)
+                        val note = getNoteId(request.id)
+
+                        if (note != null) {
+                            call.respond(
+                                OK,
+                                SimpleResponseWithData(
+                                    successful = true,
+                                    statusCode = OK,
+                                    message = "Owner removed from note",
+                                    data = note
+                                )
+                            )
+                            return@post
+                        }
+
+                        // Entire note was deleted
+                        call.respond(
+                            OK,
+                            SimpleResponseWithData<Note?>(
+                                successful = true,
+                                statusCode = OK,
+                                message = "Note deleted",
+                                data = null
+                            )
+                        )
+                    } else {
+                        call.respond(
+                            InternalServerError,
+                            SimpleResponse(
+                                successful = false,
+                                statusCode = InternalServerError,
+                                message = "Note not deleted (Owner not authorized)"
                             )
                         )
                     }
@@ -172,7 +249,7 @@ private suspend fun ApplicationCall.getNotesRequest(
 
 private suspend fun ApplicationCall.respondPlatform(
     isFromWeb: Boolean,
-    response: AppResponse
+    response: BaseSimpleResponse
 ) {
     when (isFromWeb) {
         true -> {
@@ -188,7 +265,7 @@ private suspend fun ApplicationCall.respondPlatform(
 
 
 private suspend fun ApplicationCall.respondRawHTML(
-    response: AppResponse =
+    response: BaseSimpleResponse =
         SimpleResponse(
             successful = false,
             statusCode = HttpStatusCode.NotFound,
@@ -225,7 +302,9 @@ private suspend fun ApplicationCall.respondRawHTML(
                             <br>
                             ${
                                 if (response is SimpleResponseWithData<*>) {
-                                    renderNotesList(response)
+                                    runBlocking {
+                                        renderNotesListHTML(response)
+                                    }
                                 } else ""
                             }
                         </h2>
@@ -238,7 +317,7 @@ private suspend fun ApplicationCall.respondRawHTML(
     }
 }
 
-private fun renderNotesList(response: SimpleResponseWithData<*>) =
+private suspend fun ApplicationCall.renderNotesListHTML(response: SimpleResponseWithData<*>) =
 """
     <p>Data:</p>
     <code>
@@ -252,15 +331,28 @@ private fun renderNotesList(response: SimpleResponseWithData<*>) =
                 """
             <p>${it.size} note${addPostfixS(it)} found</p>
             <ul>
+            <style>
+                .italic {
+                    font-style: italic; 
+                    font-weight: 100;
+                }
+            </style>
             ${
                     it.map { note ->
                         """
-                    <li style="background-color: ${note.color}; list-style: decimal;">
-                        title: ${note.title}
+                    <li style="background-color: ${note.color}; list-style: decimal; margin: 2px;">
+                        <span class="italic">title: </span>${note.title}
                         <br>
-                        content: ${note.content}
+                        <span class="italic">content: </span>${note.content}
                         <br>
-                        date: ${note.date}
+                        <span class="italic">date: </span>${note.date}
+                        <br>
+                        <span class="italic">owner: </span>
+                        <code>${note.owners.map {id -> 
+                            getEmailForUserId(id) ?: "User not found"
+                        }.joinToString(", ")}
+                        </code>
+                        <br>
                     </li>
                 """
                     }.joinToString("")  // removes the [] from the markup

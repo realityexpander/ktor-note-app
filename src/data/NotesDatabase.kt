@@ -69,3 +69,27 @@ suspend fun saveNote(note: Note): Boolean {
         notes.insertOne(note).wasAcknowledged()  // if note id is supplied, but doesn't exist, insert it anyway
     }
 }
+
+suspend fun deleteNoteForUserId(userId: String, noteId: String): Boolean {
+    val note = notes.findOne(Note::id eq noteId, Note::owners contains userId)
+        ?: run {
+            println("Note with id=$noteId not found for User with id=$userId")
+            return false
+        }
+
+    // Only one owner? Just delete the entire note.
+    if(note.owners.size == 1) {
+        return notes.deleteOneById(noteId).wasAcknowledged()
+    }
+
+    // More than one owner? Remove the owner id from the list.
+    return notes.updateOneById(noteId, note.copy(owners = note.owners - userId)).wasAcknowledged()
+}
+
+suspend fun getNoteId(noteId: String): Note? {
+    return notes.findOne(Note::id eq noteId)
+}
+
+suspend fun getEmailForUserId(userId: String): String? {
+    return users.findOneById(userId)?.email
+}
