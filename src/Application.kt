@@ -1,7 +1,9 @@
 package com.realityexpander
 
+import com.realityexpander.data.checkIfUserExists
 import com.realityexpander.data.collections.User
 import com.realityexpander.data.registerUser
+import com.realityexpander.routes.registerRoute
 import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.gson.*
@@ -17,28 +19,22 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 @kotlin.jvm.JvmOverloads
 fun Application.module(testing: Boolean = false) {
 
-
-
     install(DefaultHeaders)      // Add default headers
     install(CallLogging)         // log call details
-    install(Routing)             // Our routes are defined in routes.kt
+    install(Routing) {           // Our routes are defined in routes.kt
+        registerRoute()
+    }
     install(ContentNegotiation){  // serialize JSON
         gson {
             setPrettyPrinting()
         }
     }
 
-    CoroutineScope(Dispatchers.IO).launch {
-        registerUser(
-            User(
-                email = "test@123.com",
-                password = "test123",
-            )
-        )
 
-    }
-
-
+//    Testing
+//    CoroutineScope(Dispatchers.IO).launch {
+//        println("Email Exists = ${checkIfUserExists("test@123.com")}")
+//    }
 
 }
 
