@@ -6,6 +6,7 @@ import org.bson.types.ObjectId
 data class Note(
     @BsonId // binary json object id marker
     val id: String? = ObjectId().toString(),
+
     val title: String,
     val content: String,
     val date: String,

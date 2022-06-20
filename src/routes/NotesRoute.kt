@@ -2,7 +2,7 @@ package com.realityexpander.routes
 
 import com.realityexpander.data.*
 import com.realityexpander.data.collections.Note
-import com.realityexpander.data.requests.AddOwnerToNoteRequest
+import com.realityexpander.data.requests.AddOwnerIdToNoteIdRequest
 import com.realityexpander.data.requests.DeleteNoteRequest
 import com.realityexpander.data.requests.NotesRequest
 import com.realityexpander.data.responses.BaseSimpleResponse
@@ -188,13 +188,13 @@ fun Route.notesRoute() {
         }
     }
 
-    route("/addOwnerToNote") {
+    route("/addOwnerIdToNoteId") {
         authenticate { // Authenticated post request to add an owner to a note
             post {
                 val email = call.principal<UserIdPrincipal>()!!.name
 
                 val request = try {
-                    call.receive<AddOwnerToNoteRequest>()
+                    call.receive<AddOwnerIdToNoteIdRequest>()
                 } catch (e: Exception) {
                     call.respond(
                         BadRequest,
@@ -287,7 +287,7 @@ fun Route.notesRoute() {
         }
     }
 
-    // Insecure get request to get all notes for a user (setup for testing)
+    // Insecure get request to get all notes for a specific user (setup for testing)
     get("/notes") {
         var isFromWeb = false
 
@@ -451,7 +451,7 @@ private suspend fun ApplicationCall.renderNotesListHTML(response: SimpleResponse
             @Suppress("UNCHECKED_CAST") // we're pretty sure it's a `List<Note>`
             (response.data as? List<Note>)?.let { 
             """
-            <p>${it.size} note${addPostfixS(it)} found</p>
+            <p>${it.size} note${addPostfixS(it)} found for user: ${request.queryParameters["email"]}</p>
             <ul>
             <style>
                 .italic {
@@ -460,25 +460,25 @@ private suspend fun ApplicationCall.renderNotesListHTML(response: SimpleResponse
                 }
             </style>
             ${
-                    it.map { note ->
-                        """
-                    <li style="background-color: ${note.color}; list-style: decimal; margin: 2px;">
-                        <span class="italic">title: </span>${note.title}
-                        <br>
-                        <span class="italic">content: </span>${note.content}
-                        <br>
-                        <span class="italic">date: </span>${note.date}
-                        <br>
-                        <span class="italic">owner: </span>
-                        <code>${note.owners.map {id -> 
-                            getEmailForUserId(id) ?: "User not found"
-                        }.joinToString(", ")}
-                        </code>
-                        <br>
-                    </li>
-                """
-                    }.joinToString("")  // removes the []'s from the markup
-                }
+                it.map { note ->
+                    """
+                <li style="background-color: ${note.color}; list-style: decimal; margin: 2px;">
+                    <span class="italic">title: </span>${note.title}
+                    <br>
+                    <span class="italic">content: </span>${note.content}
+                    <br>
+                    <span class="italic">date: </span>${note.date}
+                    <br>
+                    <span class="italic">owner: </span>
+                    <code>${note.owners.map {id -> 
+                        getEmailForUserId(id) ?: "User not found"
+                    }.joinToString(", ")}
+                    </code>
+                    <br>
+                </li>
+            """
+                }.joinToString("")  // removes the []'s from the markup
+            }
             </ul>
             """.trimIndent()
             } ?: ""
