@@ -16,7 +16,7 @@ suspend fun registerUser(user: User): Boolean {
     return users.insertOne(user).wasAcknowledged()
 }
 
-suspend fun checkIfUserExists(email: String): Boolean {
+suspend fun ifUserEmailExists(email: String): Boolean {
     // SQL would look like this:
     // SELECT * FROM user WHERE email = :$email
 
@@ -27,8 +27,16 @@ suspend fun checkIfUserExists(email: String): Boolean {
     return users.findOne(User::email eq email) != null
 }
 
-suspend fun getUser(email: String): User? {
+suspend fun ifUserIdExists(id: String): Boolean {
+    return users.findOne(User::id eq id) != null
+}
+
+suspend fun getUserByEmail(email: String): User? {
     return users.findOne(User::email eq email)
+}
+
+suspend fun getEmailForUserId(userId: String): String? {
+    return users.findOneById(userId)?.email
 }
 
 suspend fun checkPasswordForEmail(email: String, passwordToCheck: String): Boolean {
@@ -36,7 +44,7 @@ suspend fun checkPasswordForEmail(email: String, passwordToCheck: String): Boole
         ?.password == passwordToCheck
 }
 
-suspend fun getNotesForUser(email: String): List<Note> {
+suspend fun getNotesForUserByEmail(email: String): List<Note> {
     val id = users.findOne(User::email eq email)?.id
 
     // json text based query:
@@ -55,7 +63,6 @@ suspend fun getNotesForUser(email: String): List<Note> {
     return notes.find(Note::owners contains id).toList() // text based query
 }
 
-
 suspend fun saveNote(note: Note): Boolean {
     if(note.id == null || note.id.isBlank()) {
         return notes.insertOne(note).wasAcknowledged() // inserting will automatically set the id of the new note
@@ -70,7 +77,7 @@ suspend fun saveNote(note: Note): Boolean {
     }
 }
 
-suspend fun deleteNoteForUserId(userId: String, noteId: String): Boolean {
+suspend fun deleteNoteIdForUserId(userId: String, noteId: String): Boolean {
     val note = notes.findOne(Note::id eq noteId, Note::owners contains userId)
         ?: run {
             println("Note with id=$noteId not found for User with id=$userId")
@@ -90,6 +97,25 @@ suspend fun getNoteId(noteId: String): Note? {
     return notes.findOne(Note::id eq noteId)
 }
 
-suspend fun getEmailForUserId(userId: String): String? {
-    return users.findOneById(userId)?.email
+suspend fun addOwnerIdToNoteId(userId: String, noteId: String): Boolean {
+    val note = notes.findOneById(noteId) ?: run {
+        println("Note with id=$noteId not found")
+        return false
+    }
+
+    if (isOwnerOfNoteId(userId, noteId)) {
+        println("User with id=$userId already owns note with id=$noteId")
+        return false
+    }
+
+    return notes.updateOneById(noteId, note.copy(owners = note.owners + userId)).wasAcknowledged()
+}
+
+suspend fun isOwnerOfNoteId(userId: String, noteId: String): Boolean {
+    val note = notes.findOneById(noteId) ?: run {
+        println("Note with id=$noteId not found")
+        return false
+    }
+
+    return note.owners.contains(userId)
 }

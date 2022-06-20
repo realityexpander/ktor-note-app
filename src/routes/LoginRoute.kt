@@ -1,6 +1,6 @@
 package com.realityexpander.routes
 
-import com.realityexpander.data.checkIfUserExists
+import com.realityexpander.data.ifUserEmailExists
 import com.realityexpander.data.checkPasswordForEmail
 import com.realityexpander.data.requests.AccountRequest
 import com.realityexpander.data.responses.SimpleResponse
@@ -50,7 +50,7 @@ fun Route.loginRoute() {
             return@post
         }
 
-        val userExists = checkIfUserExists(request.email)
+        val userExists = ifUserEmailExists(request.email)
         if (userExists) {
             if (checkPasswordForEmail(request.email, request.password)) {
                 call.respondPlatform(

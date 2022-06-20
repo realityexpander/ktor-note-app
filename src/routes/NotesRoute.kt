@@ -2,6 +2,7 @@ package com.realityexpander.routes
 
 import com.realityexpander.data.*
 import com.realityexpander.data.collections.Note
+import com.realityexpander.data.requests.AddOwnerToNoteRequest
 import com.realityexpander.data.requests.DeleteNoteRequest
 import com.realityexpander.data.requests.NotesRequest
 import com.realityexpander.data.responses.BaseSimpleResponse
@@ -27,7 +28,7 @@ fun Route.notesRoute() {
         authenticate {
             get {
                 val email = call.principal<UserIdPrincipal>()!!.name
-                val notes = getNotesForUser(email)
+                val notes = getNotesForUserByEmail(email)
                 call.respond(OK,
                     SimpleResponseWithData<List<Note>>(
                         successful = true, statusCode = HttpStatusCode.OK,
@@ -35,6 +36,8 @@ fun Route.notesRoute() {
                         data = notes
                     )
                 )
+
+                return@get
             }
         }
     }
@@ -57,7 +60,7 @@ fun Route.notesRoute() {
                 }
 
                 val email = call.principal<UserIdPrincipal>()!!.name
-                val userExists = checkIfUserExists(email)
+                val userExists = ifUserEmailExists(email)
                 if (userExists) {
                     val acknowledged = saveNote(note)
 
@@ -71,6 +74,8 @@ fun Route.notesRoute() {
                                 data = note
                             )
                         )
+
+                        return@post
                     } else {
                         call.respond(
                             OK,
@@ -81,6 +86,8 @@ fun Route.notesRoute() {
                                 data = note
                             )
                         )
+
+                        return@post
                     }
                 } else {
                     call.respond(
@@ -91,6 +98,8 @@ fun Route.notesRoute() {
                             message = "User not found"
                         )
                     )
+
+                    return@post
                 }
             }
         }
@@ -115,12 +124,12 @@ fun Route.notesRoute() {
                     return@post
                 }
 
-                val userExists = checkIfUserExists(email)
+                val userExists = ifUserEmailExists(email)
                 if (userExists) {
-                    val userId = getUser(email)!!.id
+                    val userId = getUserByEmail(email)!!.id
 
                     // Only delete the note for this userId
-                    val acknowledged = deleteNoteForUserId(userId, request.id)
+                    val acknowledged = deleteNoteIdForUserId(userId, request.id)
 
                     if (acknowledged) {
                         // Check if note still exists (ie: only an owner was removed)
@@ -136,6 +145,7 @@ fun Route.notesRoute() {
                                     data = note
                                 )
                             )
+
                             return@post
                         }
 
@@ -149,6 +159,7 @@ fun Route.notesRoute() {
                                 data = null
                             )
                         )
+                        return@post
                     } else {
                         call.respond(
                             InternalServerError,
@@ -158,6 +169,8 @@ fun Route.notesRoute() {
                                 message = "Note not deleted (Owner not authorized)"
                             )
                         )
+
+                        return@post
                     }
                 } else {
                     call.respond(
@@ -168,6 +181,107 @@ fun Route.notesRoute() {
                             message = "User not found"
                         )
                     )
+
+                    return@post
+                }
+            }
+        }
+    }
+
+    route("/addOwnerToNote") {
+        authenticate { // Authenticated post request to add an owner to a note
+            post {
+                val email = call.principal<UserIdPrincipal>()!!.name
+
+                val request = try {
+                    call.receive<AddOwnerToNoteRequest>()
+                } catch (e: Exception) {
+                    call.respond(
+                        BadRequest,
+                        SimpleResponse(
+                            successful = false,
+                            statusCode = BadRequest,
+                            message = "Invalid 'add owner to note' format"
+                        )
+                    )
+
+                    return@post
+                }
+
+                if (ifUserIdExists(request.ownerIdToAdd)) {
+
+                    // Already an owner of this note?
+                    if(isOwnerOfNoteId(request.ownerIdToAdd, request.noteId)) {
+                        val note = getNoteId(request.noteId)!!
+
+                        call.respond(
+                            OK,
+                            SimpleResponseWithData<Note?>(
+                                successful = false,
+                                statusCode = OK,
+                                message = "${getEmailForUserId(request.ownerIdToAdd)} is already an owner of this note",
+                                data = note
+                            )
+                        )
+
+                        return@post
+                    }
+
+                    val acknowledged = addOwnerIdToNoteId(request.ownerIdToAdd, request.noteId)
+
+                    if (acknowledged) {
+                        val note = getNoteId(request.noteId)
+
+                        if (note != null) {
+                            call.respond(
+                                OK,
+                                SimpleResponseWithData(
+                                    successful = true,
+                                    statusCode = OK,
+                                    message = "Owner added to note, " +
+                                            "${getEmailForUserId(request.ownerIdToAdd)} can now see this note",
+                                    data = note
+                                )
+                            )
+                            return@post
+                        }
+
+                        // Problem finding updated note
+                        call.respond(
+                            InternalServerError,
+                            SimpleResponseWithData<Note?>(
+                                successful = false,
+                                statusCode = InternalServerError,
+                                message = "Note not updated - cant find note",
+                                data = null
+                            )
+                        )
+
+                        return@post
+
+                    } else {
+                        call.respond(
+                            InternalServerError,
+                            SimpleResponse(
+                                successful = false,
+                                statusCode = InternalServerError,
+                                message = "Note not updated - Update failed"
+                            )
+                        )
+
+                        return@post
+                    }
+                } else {
+                    call.respond(
+                        BadRequest,
+                        SimpleResponse(
+                            successful = false,
+                            statusCode = BadRequest,
+                            message = "User was not found - Can't add owner to note"
+                        )
+                    )
+
+                    return@post
                 }
             }
         }
@@ -193,6 +307,7 @@ fun Route.notesRoute() {
                     "Error: ${e.localizedMessage}"
                 )
             )
+
             return@get
         } catch (e: Exception) {
             call.respondPlatform(
@@ -202,6 +317,7 @@ fun Route.notesRoute() {
                     "Error: ${e.localizedMessage}"
                 )
             )
+
             return@get
         }
 
@@ -213,9 +329,9 @@ private suspend fun ApplicationCall.getNotesRequest(
     request: NotesRequest,
     isFromWeb: Boolean
 ) {
-    val userExists = checkIfUserExists(request.email)
+    val userExists = ifUserEmailExists(request.email)
     if (userExists) {
-        val notes = getNotesForUser(request.email)
+        val notes = getNotesForUserByEmail(request.email)
 
         if (notes.isNotEmpty()) {
             respondPlatform(
@@ -226,6 +342,8 @@ private suspend fun ApplicationCall.getNotesRequest(
                     data = notes
                 )
             )
+
+            return
         } else {
             respondPlatform(
                 isFromWeb,
@@ -235,6 +353,8 @@ private suspend fun ApplicationCall.getNotesRequest(
                     data = emptyList()
                 )
             )
+
+            return
         }
     } else {
         respondPlatform(
@@ -244,6 +364,8 @@ private suspend fun ApplicationCall.getNotesRequest(
                 "Error: Email does not exist"
             )
         )
+
+        return
     }
 }
 

@@ -1,6 +1,6 @@
 package com.realityexpander.routes
 
-import com.realityexpander.data.checkIfUserExists
+import com.realityexpander.data.ifUserEmailExists
 import com.realityexpander.data.collections.User
 import com.realityexpander.data.registerUser
 import com.realityexpander.data.requests.AccountRequest
@@ -43,7 +43,7 @@ fun Route.registerRoute() {
                 return@post
             }
 
-            val userExists = checkIfUserExists(request.email)
+            val userExists = ifUserEmailExists(request.email)
             if (!userExists) {
 
                 if (request.email.isBlank() || request.password.isBlank()) {
