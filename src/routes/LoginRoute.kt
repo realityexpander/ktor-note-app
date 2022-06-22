@@ -212,7 +212,7 @@ private suspend fun ApplicationCall.respondRawHTML(
                         <title>Login</title>
                         <style>
                             .status {
-                                background-color: ${if (response.successful) "#008800" else "#880000"};
+                                background-color: ${if (response.isSuccessful) "#008800" else "#880000"};
                                 color: white;
                                 padding: 10px;
                             }
@@ -220,13 +220,13 @@ private suspend fun ApplicationCall.respondRawHTML(
                       </head>
                       
                       <body>
-                        <h1>${if (response.successful) "Success" else "Error"}</h1>
+                        <h1>${if (response.isSuccessful) "Success" else "Error"}</h1>
                         <br>
                         <h2>
                             <div class="status">
                                 <br>
                                 <p>${response.message}</p>
-                                ${if (!response.successful) "<br><p>Response code: ${response.statusCode}</p>" else ""}
+                                ${if (!response.isSuccessful) "<br><p>Response code: ${response.statusCode}</p>" else ""}
                                 <br>
                             </div>
                         </h2>

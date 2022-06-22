@@ -31,7 +31,7 @@ fun Route.notesRoute() {
                 val notes = getNotesForUserByEmail(email)
                 call.respond(OK,
                     SimpleResponseWithData<List<Note>>(
-                        successful = true, statusCode = HttpStatusCode.OK,
+                        isSuccessful = true, statusCode = HttpStatusCode.OK,
                         message = "${notes.size} note${addPostfixS(notes)} found",
                         data = notes
                     )
@@ -51,7 +51,7 @@ fun Route.notesRoute() {
                     call.respond(
                         OK,
                         SimpleResponse(
-                            successful = false,
+                            isSuccessful = false,
                             statusCode = HttpStatusCode.BadRequest,
                             message = "Invalid note format"
                         )
@@ -68,7 +68,7 @@ fun Route.notesRoute() {
                         call.respond(
                             OK,
                             SimpleResponseWithData(
-                                successful = true,
+                                isSuccessful = true,
                                 statusCode = OK,
                                 message = "Note added",
                                 data = note
@@ -80,7 +80,7 @@ fun Route.notesRoute() {
                         call.respond(
                             OK,
                             SimpleResponseWithData(
-                                successful = false,
+                                isSuccessful = false,
                                 statusCode = InternalServerError,
                                 message = "Note not added",
                                 data = note
@@ -93,7 +93,7 @@ fun Route.notesRoute() {
                     call.respond(
                         BadRequest,
                         SimpleResponse(
-                            successful = false,
+                            isSuccessful = false,
                             statusCode = BadRequest,
                             message = "User not found"
                         )
@@ -116,7 +116,7 @@ fun Route.notesRoute() {
                     call.respond(
                         BadRequest,
                         SimpleResponse(
-                            successful = false,
+                            isSuccessful = false,
                             statusCode = HttpStatusCode.BadRequest,
                             message = "Invalid delete note format"
                         )
@@ -139,7 +139,7 @@ fun Route.notesRoute() {
                             call.respond(
                                 OK,
                                 SimpleResponseWithData(
-                                    successful = true,
+                                    isSuccessful = true,
                                     statusCode = OK,
                                     message = "Owner removed from note",
                                     data = note
@@ -153,7 +153,7 @@ fun Route.notesRoute() {
                         call.respond(
                             OK,
                             SimpleResponseWithData<Note?>(
-                                successful = true,
+                                isSuccessful = true,
                                 statusCode = OK,
                                 message = "Note deleted",
                                 data = null
@@ -164,7 +164,7 @@ fun Route.notesRoute() {
                         call.respond(
                             InternalServerError,
                             SimpleResponse(
-                                successful = false,
+                                isSuccessful = false,
                                 statusCode = InternalServerError,
                                 message = "Note not deleted (Owner not authorized)"
                             )
@@ -176,7 +176,7 @@ fun Route.notesRoute() {
                     call.respond(
                         BadRequest,
                         SimpleResponse(
-                            successful = false,
+                            isSuccessful = false,
                             statusCode = BadRequest,
                             message = "User not found"
                         )
@@ -199,7 +199,7 @@ fun Route.notesRoute() {
                     call.respond(
                         BadRequest,
                         SimpleResponse(
-                            successful = false,
+                            isSuccessful = false,
                             statusCode = BadRequest,
                             message = "Invalid 'add owner to note' format"
                         )
@@ -217,7 +217,7 @@ fun Route.notesRoute() {
                         call.respond(
                             OK,
                             SimpleResponseWithData<Note?>(
-                                successful = false,
+                                isSuccessful = false,
                                 statusCode = OK,
                                 message = "${getEmailForUserId(request.ownerIdToAdd)} is already an owner of this note",
                                 data = note
@@ -236,7 +236,7 @@ fun Route.notesRoute() {
                             call.respond(
                                 OK,
                                 SimpleResponseWithData(
-                                    successful = true,
+                                    isSuccessful = true,
                                     statusCode = OK,
                                     message = "Owner added to note, " +
                                             "${getEmailForUserId(request.ownerIdToAdd)} can now see this note",
@@ -250,7 +250,7 @@ fun Route.notesRoute() {
                         call.respond(
                             InternalServerError,
                             SimpleResponseWithData<Note?>(
-                                successful = false,
+                                isSuccessful = false,
                                 statusCode = InternalServerError,
                                 message = "Note not updated - cant find note",
                                 data = null
@@ -263,7 +263,7 @@ fun Route.notesRoute() {
                         call.respond(
                             InternalServerError,
                             SimpleResponse(
-                                successful = false,
+                                isSuccessful = false,
                                 statusCode = InternalServerError,
                                 message = "Note not updated - Update failed"
                             )
@@ -275,7 +275,7 @@ fun Route.notesRoute() {
                     call.respond(
                         BadRequest,
                         SimpleResponse(
-                            successful = false,
+                            isSuccessful = false,
                             statusCode = BadRequest,
                             message = "User was not found - Can't add owner to note"
                         )
@@ -337,7 +337,7 @@ private suspend fun ApplicationCall.getNotesRequest(
             respondPlatform(
                 isFromWeb,
                 SimpleResponseWithData<List<Note>>(
-                    successful = true, statusCode = HttpStatusCode.OK,
+                    isSuccessful = true, statusCode = HttpStatusCode.OK,
                     message = "${notes.size} note${addPostfixS(notes)} found",
                     data = notes
                 )
@@ -348,7 +348,7 @@ private suspend fun ApplicationCall.getNotesRequest(
             respondPlatform(
                 isFromWeb,
                 SimpleResponseWithData<List<Note>>(
-                    successful = true, statusCode = HttpStatusCode.OK,
+                    isSuccessful = true, statusCode = HttpStatusCode.OK,
                     message = "No Notes found for user ${request.email}",
                     data = emptyList()
                 )
@@ -389,7 +389,7 @@ private suspend fun ApplicationCall.respondPlatform(
 private suspend fun ApplicationCall.respondRawHTML(
     response: BaseSimpleResponse =
         SimpleResponse(
-            successful = false,
+            isSuccessful = false,
             statusCode = HttpStatusCode.NotFound,
             message = "No Lists found"
         )
@@ -404,7 +404,7 @@ private suspend fun ApplicationCall.respondRawHTML(
                         <title>Notes</title>
                         <style>
                             .status {
-                                background-color: ${if (response.successful) "#008800" else "#880000"};
+                                background-color: ${if (response.isSuccessful) "#008800" else "#880000"};
                                 color: white;
                                 padding: 10px;
                             }
@@ -412,13 +412,13 @@ private suspend fun ApplicationCall.respondRawHTML(
                       </head>
                       
                       <body>
-                        <h1>${if (response.successful) "Success" else "Error"}</h1>
+                        <h1>${if (response.isSuccessful) "Success" else "Error"}</h1>
                         <br>
                         <h2>
                             <div class="status">
                                 <br>
                                 <p>Message from server: ${response.message}</p>
-                                ${if (!response.successful) "<br><p>Response code: ${response.statusCode}</p>" else ""}
+                                ${if (!response.isSuccessful) "<br><p>Response code: ${response.statusCode}</p>" else ""}
                                 <br>
                             </div>
                             <br>
