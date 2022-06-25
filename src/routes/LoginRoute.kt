@@ -16,7 +16,7 @@ fun Route.loginRoute() {
     post("/login") {
         var isFromWeb = false
 
-        // Get the registration parameters
+        // Get the login parameters
         val request = try {
 
             // From web or mobile app?
@@ -56,7 +56,8 @@ fun Route.loginRoute() {
                 call.respondPlatform(
                     isFromWeb,
                     SimpleResponse(
-                        true, HttpStatusCode.OK,
+                        true,
+                        HttpStatusCode.OK,
                         "Login successful"
                     )
                 )
@@ -64,7 +65,8 @@ fun Route.loginRoute() {
                 call.respondPlatform(
                     isFromWeb,
                     SimpleResponse(
-                        false, HttpStatusCode.Unauthorized,
+                        false,
+                        HttpStatusCode.Unauthorized,
                         "Error: Password incorrect"
                     )
                 )
@@ -73,7 +75,8 @@ fun Route.loginRoute() {
             call.respondPlatform(
                 isFromWeb,
                 SimpleResponse(
-                    false, HttpStatusCode.NotFound,
+                    false,
+                    HttpStatusCode.NotFound,
                     "Error: Email does not exist"
                 )
             )

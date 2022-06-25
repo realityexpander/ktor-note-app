@@ -10,6 +10,7 @@ data class Note(
     val title: String,
     val content: String,
     val date: String,
-    val owners: List<String>,  // list of owner Id's that have access to this note
+    val dateMillis: Long = 0,
+    val owners: List<String>,  // list of owner id's that have access to this note
     val color: String,
 )

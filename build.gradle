@@ -51,11 +51,11 @@ dependencies {
     implementation "io.ktor:ktor-gson:$ktor_version"
 
     // Mongo
-    implementation 'org.litote.kmongo:kmongo:4.0.2'
-    implementation 'org.litote.kmongo:kmongo-coroutine:4.0.2'
+    implementation "org.litote.kmongo:kmongo:$kmongo_version"
+    implementation "org.litote.kmongo:kmongo-coroutine:$kmongo_version"
 
     // Coroutines
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.7'
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinx_coroutines_core_version"
 
     // Encryption / Security
     implementation 'commons-codec:commons-codec:1.14'

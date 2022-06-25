@@ -323,6 +323,56 @@ fun Route.notesRoute() {
 
         call.getNotesRequest(request, isFromWeb)
     }
+
+    get("/getOwnerIdForEmail") {
+        val email = call.parameters["email"]!!
+        val user = getUserByEmail(email)
+        if (user != null) {
+            call.respond(
+                OK,
+                SimpleResponseWithData(
+                    isSuccessful = true,
+                    statusCode = OK,
+                    message = "User found",
+                    data = user.id
+                )
+            )
+        } else {
+            call.respond(
+                BadRequest,
+                SimpleResponse(
+                    isSuccessful = false,
+                    statusCode = BadRequest,
+                    message = "User not found"
+                )
+            )
+        }
+    }
+
+    get("/getEmailForOwnerId") {
+        val ownerId = call.parameters["ownerId"]!!
+        val email = getEmailForUserId(ownerId)
+        if (email != null) {
+            call.respond(
+                OK,
+                SimpleResponseWithData(
+                    isSuccessful = true,
+                    statusCode = OK,
+                    message = "User found",
+                    data = email
+                )
+            )
+        } else {
+            call.respond(
+                BadRequest,
+                SimpleResponse(
+                    isSuccessful = false,
+                    statusCode = BadRequest,
+                    message = "User not found"
+                )
+            )
+        }
+    }
 }
 
 private suspend fun ApplicationCall.getNotesRequest(
@@ -490,6 +540,6 @@ private suspend fun ApplicationCall.renderNotesListHTML(response: SimpleResponse
     }                                   
     """.trimIndent()
 
-// Add s to the end of the string if it's not 1
+// Add s to the end of the string if it's greater than 1
 private fun addPostfixS(it: List<Note>) =
     if (it.size > 1) "s" else ""
