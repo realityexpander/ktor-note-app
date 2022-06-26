@@ -3,6 +3,23 @@ package com.realityexpander
 // Ktor Docs
 // https://ktor.io/docs/requests.html#path_parameters
 
+// LetsEncypt - signs certificates for a domain for free (but we dont have a domain yet)
+// https://letsencrypt.org/certificates/
+
+// Self-generate certificates for our ip Addresses (wont be accepted by general web sites, but good for our testing)
+// For SSL/HTTPS traffic
+// keytool -genkey -v -keystore ktornoteapp.jks -alias ktor_note_app -keyalg RSA -keysize 4096
+//   -> password: password    <-- keyStorePassword
+//   -> first and lastname: chris athanas
+//   -> organization unit: realityexpander
+//   -> organization: realityexpander
+//   -> city: austin
+//   -> state: texas
+//   -> country code: us
+//   -> correct: yes
+//   -> enter password: password    <-- privateKeyPassword
+//   -> enter password again: password
+
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.LoggerContext
 import com.realityexpander.data.checkPasswordForEmail
