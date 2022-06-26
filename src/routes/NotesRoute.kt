@@ -14,6 +14,7 @@ import io.ktor.html.*
 import io.ktor.http.*
 import io.ktor.http.HttpStatusCode.Companion.BadRequest
 import io.ktor.http.HttpStatusCode.Companion.InternalServerError
+import io.ktor.http.HttpStatusCode.Companion.NotAcceptable
 import io.ktor.http.HttpStatusCode.Companion.OK
 import io.ktor.request.*
 import io.ktor.response.*
@@ -53,7 +54,7 @@ fun Route.notesRoute() {
                         OK,
                         SimpleResponse(
                             isSuccessful = false,
-                            statusCode = HttpStatusCode.BadRequest,
+                            statusCode = BadRequest,
                             message = "Invalid note format"
                         )
                     )
@@ -118,7 +119,7 @@ fun Route.notesRoute() {
                         BadRequest,
                         SimpleResponse(
                             isSuccessful = false,
-                            statusCode = HttpStatusCode.BadRequest,
+                            statusCode = BadRequest,
                             message = "Invalid delete note format"
                         )
                     )
@@ -344,17 +345,19 @@ fun Route.notesRoute() {
 
         val request = try {
             if (call.request.queryParameters["email"] != null) {
+                // coming from the web (query params)
                 isFromWeb = true
-                NotesRequest(email = call.parameters["email"]!!) // coming from the web (query params)
+                NotesRequest(email = call.parameters["email"]!!)
             } else {
+                // coming from mobile app (body json)
                 isFromWeb = false
-                call.receive<NotesRequest>()  // coming from mobile app (body json)
+                call.receive<NotesRequest>()
             }
         } catch (e: ContentTransformationException) {
             call.respondPlatform(
                 isFromWeb,
                 SimpleResponse(
-                    false, HttpStatusCode.BadRequest,
+                    false, BadRequest,
                     "Error: ${e.localizedMessage}"
                 )
             )
@@ -364,7 +367,7 @@ fun Route.notesRoute() {
             call.respondPlatform(
                 isFromWeb,
                 SimpleResponse(
-                    false, HttpStatusCode.NotAcceptable,
+                    false, NotAcceptable,
                     "Error: ${e.localizedMessage}"
                 )
             )
