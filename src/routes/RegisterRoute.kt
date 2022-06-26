@@ -5,6 +5,7 @@ import com.realityexpander.data.collections.User
 import com.realityexpander.data.registerUser
 import com.realityexpander.data.requests.AccountRequest
 import com.realityexpander.data.responses.SimpleResponse
+import com.realityexpander.security.getHashWithSaltForPassword
 import io.ktor.application.*
 import io.ktor.http.HttpStatusCode.Companion.BadRequest
 import io.ktor.http.HttpStatusCode.Companion.Conflict
@@ -55,7 +56,7 @@ fun Route.registerRoute() {
                 }
 
                 if (registerUser(
-                        User(email = request.email, password = request.password)
+                        User(email = request.email, password = getHashWithSaltForPassword(request.password))
                     )
                 ) {
                     call.respond(

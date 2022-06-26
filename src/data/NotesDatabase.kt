@@ -2,6 +2,7 @@ package com.realityexpander.data
 
 import com.realityexpander.data.collections.Note
 import com.realityexpander.data.collections.User
+import com.realityexpander.security.isPasswordAndHashWithSaltMatching
 import org.litote.kmongo.contains
 import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.eq
@@ -40,8 +41,12 @@ suspend fun getEmailForUserId(userId: String): String? {
 }
 
 suspend fun checkPasswordForEmail(email: String, passwordToCheck: String): Boolean {
-    return users.findOne(User::email eq email)
-        ?.password == passwordToCheck
+    val savedPassword = users.findOne(User::email eq email)
+        ?: return false
+    if (passwordToCheck == savedPassword.password) // TODO remove this, allows us to log into old accounts for now
+        return true
+
+    return isPasswordAndHashWithSaltMatching(passwordToCheck, savedPassword.password)
 }
 
 suspend fun getNotesForUserByEmail(email: String): List<Note> {
