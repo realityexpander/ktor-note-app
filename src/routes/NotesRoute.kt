@@ -239,7 +239,7 @@ fun Route.notesRoute() {
                                     isSuccessful = true,
                                     statusCode = OK,
                                     message = "Owner added to note, " +
-                                            "${getEmailForUserId(request.ownerIdToAdd)} can now see this note",
+                                            "${getEmailForUserId(request.ownerIdToAdd)} can now access this note",
                                     data = note
                                 )
                             )
