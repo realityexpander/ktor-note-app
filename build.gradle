@@ -15,6 +15,28 @@ group 'com.realityexpander'
 version '0.0.1'
 mainClassName = "io.ktor.server.netty.EngineMain"
 
+// Generate a jar file - puts results into `./release` directory
+jar {
+    from {
+        configurations.runtimeClasspath.collect { file -> file.isDirectory() ? file : zipTree(file) }
+    }
+    manifest {
+        attributes (
+                'Implementation-Title': 'Ktor-server-notes',
+                "Main-Class": mainClassName,
+                'Implementation-Version': '0.0.1',
+                'Implementation-Vendor': 'com.realityexpander',
+                'Implementation-Vendor-Id': 'com.realityexpander',
+                'Implementation-Vendor-Url': 'https://github.com/realityexpander',
+                'Implementation-Description': 'Ktor-server-notes',
+                'Implementation-License': 'Apache-2.0',
+                'Implementation-License-Url': 'http://www.apache.org/licenses/LICENSE-2.0.html',
+        )
+    }
+    destinationDirectory = file("$rootDir/release")
+    archivesBaseName = "app"
+}
+
 sourceSets {
     main.kotlin.srcDirs = main.java.srcDirs = ['src']
     test.kotlin.srcDirs = test.java.srcDirs = ['test']

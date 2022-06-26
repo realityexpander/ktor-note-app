@@ -21,7 +21,6 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.html.unsafe
-import java.awt.Color
 
 fun Route.notesRoute() {
 
@@ -33,7 +32,7 @@ fun Route.notesRoute() {
                 val notes = getNotesForUserByEmail(email)
                 call.respond(OK,
                     SimpleResponseWithData<List<Note>>(
-                        isSuccessful = true, statusCode = HttpStatusCode.OK,
+                        isSuccessful = true, statusCode = OK,
                         message = "${notes.size} note${addPostfixS(notes)} found",
                         data = notes
                     )
@@ -391,7 +390,7 @@ private suspend fun ApplicationCall.getNotesRequest(
             respondPlatform(
                 isFromWeb,
                 SimpleResponseWithData<List<Note>>(
-                    isSuccessful = true, statusCode = HttpStatusCode.OK,
+                    isSuccessful = true, statusCode = OK,
                     message = "${notes.size} note${addPostfixS(notes)} found",
                     data = notes
                 )
@@ -402,7 +401,7 @@ private suspend fun ApplicationCall.getNotesRequest(
             respondPlatform(
                 isFromWeb,
                 SimpleResponseWithData<List<Note>>(
-                    isSuccessful = true, statusCode = HttpStatusCode.OK,
+                    isSuccessful = true, statusCode = OK,
                     message = "No Notes found for user ${request.email}",
                     data = emptyList()
                 )
@@ -481,12 +480,13 @@ private suspend fun ApplicationCall.respondRawHTML(
                             </div>
                             <br>
                             ${
+                                // If it's a success, there will be data attached.
                                 if (response is SimpleResponseWithData<*>) {
                                     runBlocking {
                                         @Suppress("UNCHECKED_CAST")
                                         renderNotesListHTML(response as SimpleResponseWithData<List<Note>>)
                                     }
-                                } else ""
+                                } else "No Data"
                             }
                         </h2>
                         <br>
@@ -510,16 +510,16 @@ private suspend fun ApplicationCall.renderNotesListHTML(response: SimpleResponse
                 separator = "]<br>• [",
                 postfix = "]"
             ) { it.toString() }
-        } ?: "No data"
+        }
     }
     </code>
     <br>
     ${
         try {
             @Suppress("UNCHECKED_CAST") // we're pretty sure it's a `List<Note>`
-            response.data.let { 
+            response.data.let { notes -> 
             """
-            <p>${it.size} note${addPostfixS(it)} found for user: ${request.queryParameters["email"]}</p>
+            <p>${notes.size} note${addPostfixS(notes)} found for user: ${request.queryParameters["email"]}</p>
             
             <style>
                 .italic {
@@ -539,7 +539,7 @@ private suspend fun ApplicationCall.renderNotesListHTML(response: SimpleResponse
             <ul style="counter-reset: items;">
             ${
                 // List each note as a list item
-                it.map { note ->
+                notes.map { note ->
             """
                 <li style="background-color: ${prependHashIfNotPresent(note.color)};
                            color: ${prependHashIfNotPresent(invertColor(note.color, true))};
@@ -565,7 +565,7 @@ private suspend fun ApplicationCall.renderNotesListHTML(response: SimpleResponse
             }
             </ul>
             """.trimIndent()
-            } ?: ""
+            } 
         } catch (e: Exception) {  // just in case the cast fails
             e.printStackTrace()
             "<br><p style=\"color:red; background-color:black;\">" +

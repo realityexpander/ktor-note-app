@@ -65,7 +65,7 @@ suspend fun getNotesForUserByEmail(email: String): List<Note> {
     //  """).toList()
 
     // object::based query:
-    return notes.find(Note::owners contains id).toList() // text based query
+    return notes.find(Note::owners contains id).toList()
 }
 
 suspend fun saveNote(note: Note): Boolean {
