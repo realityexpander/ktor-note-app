@@ -20,6 +20,7 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.html.unsafe
+import java.awt.Color
 
 fun Route.notesRoute() {
 
@@ -287,43 +288,6 @@ fun Route.notesRoute() {
         }
     }
 
-    // Insecure get request to get all notes for a specific user (setup for testing)
-    get("/notes") {
-        var isFromWeb = false
-
-        val request = try {
-            if (call.request.queryParameters["email"] != null) {
-                isFromWeb = true
-                NotesRequest(email = call.parameters["email"]!!) // coming from the web (query params)
-            } else {
-                isFromWeb = false
-                call.receive<NotesRequest>()  // coming from mobile app (body json)
-            }
-        } catch (e: ContentTransformationException) {
-            call.respondPlatform(
-                isFromWeb,
-                SimpleResponse(
-                    false, HttpStatusCode.BadRequest,
-                    "Error: ${e.localizedMessage}"
-                )
-            )
-
-            return@get
-        } catch (e: Exception) {
-            call.respondPlatform(
-                isFromWeb,
-                SimpleResponse(
-                    false, HttpStatusCode.NotAcceptable,
-                    "Error: ${e.localizedMessage}"
-                )
-            )
-
-            return@get
-        }
-
-        call.getNotesRequest(request, isFromWeb)
-    }
-
     get("/getOwnerIdForEmail") {
         val email = call.parameters["email"]!!
         val user = getUserByEmail(email)
@@ -372,6 +336,43 @@ fun Route.notesRoute() {
                 )
             )
         }
+    }
+
+    // Unauthenticated request to get all notes for one user with the email as html (setup for debugging)
+    get("/getAllNotesForEmail") {
+        var isFromWeb = false
+
+        val request = try {
+            if (call.request.queryParameters["email"] != null) {
+                isFromWeb = true
+                NotesRequest(email = call.parameters["email"]!!) // coming from the web (query params)
+            } else {
+                isFromWeb = false
+                call.receive<NotesRequest>()  // coming from mobile app (body json)
+            }
+        } catch (e: ContentTransformationException) {
+            call.respondPlatform(
+                isFromWeb,
+                SimpleResponse(
+                    false, HttpStatusCode.BadRequest,
+                    "Error: ${e.localizedMessage}"
+                )
+            )
+
+            return@get
+        } catch (e: Exception) {
+            call.respondPlatform(
+                isFromWeb,
+                SimpleResponse(
+                    false, HttpStatusCode.NotAcceptable,
+                    "Error: ${e.localizedMessage}"
+                )
+            )
+
+            return@get
+        }
+
+        call.getNotesRequest(request, isFromWeb)
     }
 }
 
@@ -453,6 +454,10 @@ private suspend fun ApplicationCall.respondRawHTML(
                       <head>
                         <title>Notes</title>
                         <style>
+                            body, html {
+                                background-color: #222222;
+                                color: #BBBBBB;
+                            }
                             .status {
                                 background-color: ${if (response.isSuccessful) "#008800" else "#880000"};
                                 color: white;
@@ -475,7 +480,8 @@ private suspend fun ApplicationCall.respondRawHTML(
                             ${
                                 if (response is SimpleResponseWithData<*>) {
                                     runBlocking {
-                                        renderNotesListHTML(response)
+                                        @Suppress("UNCHECKED_CAST")
+                                        renderNotesListHTML(response as SimpleResponseWithData<List<Note>>)
                                     }
                                 } else ""
                             }
@@ -489,30 +495,55 @@ private suspend fun ApplicationCall.respondRawHTML(
     }
 }
 
-private suspend fun ApplicationCall.renderNotesListHTML(response: SimpleResponseWithData<*>) =
+private suspend fun ApplicationCall.renderNotesListHTML(response: SimpleResponseWithData<List<Note>>) =
     """
     <p>Raw response data:</p>
     <code>
-        ${response.data.toString()}
+    ${
+        // Show the raw data
+        response.data.let { notes ->
+            notes.joinToString(
+                prefix = "• [",
+                separator = "]<br>• [",
+                postfix = "]"
+            ) { it.toString() }
+        } ?: "No data"
+    }
     </code>
     <br>
     ${
         try {
             @Suppress("UNCHECKED_CAST") // we're pretty sure it's a `List<Note>`
-            (response.data as? List<Note>)?.let { 
+            response.data.let { 
             """
             <p>${it.size} note${addPostfixS(it)} found for user: ${request.queryParameters["email"]}</p>
-            <ul>
+            
             <style>
                 .italic {
                     font-style: italic; 
                     font-weight: 100;
                 }
+                ul li::before {
+                  content: counter(items) "\2022";
+                  color: #BBBBBB;
+                  font-weight: bold;
+                  display: inline-block; 
+                  width: 1em;
+                  margin-left: -1em;
+                  counter-increment: items;
+                }
             </style>
+            <ul style="counter-reset: items;">
             ${
+                // List each note as a list item
                 it.map { note ->
-                    """
-                <li style="background-color: ${note.color}; list-style: decimal; margin: 2px;">
+            """
+                <li style="background-color: ${prependHashIfNotPresent(note.color)};
+                           color: ${prependHashIfNotPresent(invertColor(note.color, true))};
+                           list-style: none;
+                           list-style-color: #BBBBBB;
+                           margin: 4px 2px;"
+                    >
                     <span class="italic">title: </span>${note.title}
                     <br>
                     <span class="italic">content: </span>${note.content}
@@ -535,7 +566,8 @@ private suspend fun ApplicationCall.renderNotesListHTML(response: SimpleResponse
         } catch (e: Exception) {  // just in case the cast fails
             e.printStackTrace()
             "<br><p style=\"color:red; background-color:black;\">" +
-                    "an error occurred ${e.localizedMessage}</p><br>"
+                    "an error occurred ${e.localizedMessage}</p><br>" +
+                    "<p><code>${e.stackTrace.joinToString("<br>")}</code></p>"
         }
     }                                   
     """.trimIndent()
@@ -543,3 +575,29 @@ private suspend fun ApplicationCall.renderNotesListHTML(response: SimpleResponse
 // Add s to the end of the string if it's greater than 1
 private fun addPostfixS(it: List<Note>) =
     if (it.size > 1) "s" else ""
+
+private fun prependHashIfNotPresent(it: String) =
+    if(it.startsWith("#")) it else "#$it"
+
+private fun removeHashIfPresent(it: String) =
+    if(it.startsWith("#")) it.substring(1) else it
+
+// Accepts a hex color string (with or without "#" prefix) and returns
+//   a "#"-prefixed hex color string representing the inverted color.
+private fun invertColor(colorHexStr: String, forceLightOrDark: Boolean): String {
+    // conform the color string to a "#RRGGBB" hex string
+    val colorHex = prependHashIfNotPresent(colorHexStr).substring(1)
+
+    val r = Integer.parseInt(colorHex.substring(0, 2), 16)
+    val g = Integer.parseInt(colorHex.substring(2, 4), 16)
+    val b = Integer.parseInt(colorHex.substring(4, 6), 16)
+    val a = Integer.parseInt(colorHex.substring(6, 8), 16)
+
+    return if (forceLightOrDark) {
+        if (((r + g + b)/3.0) < 128 || a < 128 ) "#DDDDDD" else "#222222"
+    } else {
+        "#${String.format("%02x%02x%02x", 255 - r, 255 - g, 255 - b)}FF"  // Forces alpha to be 255
+        // return "#${String.format("%02X", r)}${String.format("%02X", g)}${String.format("%02X", b)}"
+    }
+}
+
