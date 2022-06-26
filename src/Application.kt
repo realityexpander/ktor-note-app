@@ -26,16 +26,20 @@ package com.realityexpander
 
 // Deploy to an Ubuntu 20.04 (Focal) server:
 //
-// From root of project, run "gradle jar":
+// From root of project, create the FatJar file of our app:
 //   ./gradle jar
 // Run sftp to upload the jar of the app to the server:
-//   sftp root@<ip address of server>:/home
+//   sftp root@<ip address of server>
 //   --> enter password
+//   mkdir home
+//   cd home
 //   put app-0.0.1.jar
 // Make a new tab in the terminal, to upload the keys to the server:
 //   cd keys
-//   sftp root@<ip address of server>:/home/keys
+//   sftp root@<ip address of server>:/home
 //   --> enter password
+//   mkdir keys
+//   cd keys
 //   put ktornoteapp.jks
 //
 // Start the server:
