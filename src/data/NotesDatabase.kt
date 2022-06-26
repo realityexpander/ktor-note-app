@@ -76,8 +76,10 @@ suspend fun saveNote(note: Note): Boolean {
     val noteExists = notes.findOneById(note.id) != null
 
     return if (noteExists) {
+        note.updatedAt = System.currentTimeMillis()
         notes.updateOneById(note.id, note).wasAcknowledged()
     } else {
+        note.createdAt = System.currentTimeMillis()
         notes.insertOne(note).wasAcknowledged()  // if note id is supplied, but doesn't exist, insert it anyway
     }
 }

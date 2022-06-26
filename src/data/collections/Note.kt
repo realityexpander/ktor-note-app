@@ -13,4 +13,6 @@ data class Note(
     val dateMillis: Long = 0,
     val owners: List<String>,  // list of owner id's that have access to this note
     val color: String,
+    var createdAt: Long = 0,  // Milliseconds since epoch, 0 if not set
+    var updatedAt: Long = 0,  // Milliseconds since epoch, 0 if not set
 )
