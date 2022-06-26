@@ -3,26 +3,30 @@ package com.realityexpander
 // Ktor Docs
 // https://ktor.io/docs/requests.html#path_parameters
 
-// LetsEncypt - signs certificates for a domain for free (but we dont have a domain yet)
+// LetsEncypt - signs certificates for a domain for free (but we don't have a domain yet)
 // https://letsencrypt.org/certificates/
 
-// Self-generate certificates for our ip Addresses (wont be accepted by general web sites, but good for our testing)
-// For SSL/HTTPS traffic
-// keytool -genkey -v -keystore ktornoteapp.jks -alias ktor_note_app -keyalg RSA -keysize 4096
-//   -> password: password    <-- keyStorePassword
-//   -> first and lastname: chris athanas
-//   -> organization unit: realityexpander
-//   -> organization: realityexpander
-//   -> city: austin
-//   -> state: texas
-//   -> country code: us
-//   -> correct: yes
-//   -> enter password: password    <-- privateKeyPassword
-//   -> enter password again: password
+// Self-generate certificates for our app and server (won't be accepted by general web sites, but good for our testing)
+// For SSL/HTTPS traffic.
+// From root folder:
+//   take keys
+//   keytool -genkey -v -keystore ktornoteapp.jks -alias ktor_note_app -keyalg RSA -keysize 4096
+//     -> password: password    <-- keyStorePassword
+//     -> first and lastname: chris athanas
+//     -> organization unit: realityexpander
+//     -> organization: realityexpander
+//     -> city: austin
+//     -> state: texas
+//     -> country code: us
+//     -> correct: yes
+//     -> enter password: password    <-- privateKeyPassword
+//     -> enter password again: password
+
+// TODO: Add /keys & *.jks folder to .gitignore
 
 // Deploy to an Ubuntu 20.04 (Focal) server:
 //
-// from root of project, run "gradle jar":
+// From root of project, run "gradle jar":
 //   ./gradle jar
 // Run sftp to upload the jar of the app to the server:
 //   sftp root@<ip address of server>:/home
@@ -104,9 +108,9 @@ package com.realityexpander
 // Enable firewall:
 //   sudo ufw enable
 // Allow incoming connections:
-//   sudo ufw allow <port>    // 8002 for our app
+//   sudo ufw allow <port>     // 8002 for our app
 // Allow outgoing connections:
-//   sudo ufw allow out <port>
+//   sudo ufw allow out <port> // 8002 for our app
 // Allow incoming connections from a specific IP:
 //   sudo ufw allow from <ip>
 // Allow outgoing connections to a specific IP:
