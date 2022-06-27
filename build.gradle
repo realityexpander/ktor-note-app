@@ -12,10 +12,11 @@ apply plugin: 'kotlin'
 apply plugin: 'application'
 
 group 'com.realityexpander'
-version '0.0.1' 
+version '0.0.1'
 mainClassName = "io.ktor.server.netty.EngineMain"
 
-// Generate a jar file - puts results into `./release` directory
+// Generate a jar file - puts results into `rootDir/root/home/release` directory
+// This directory structure reflects the server directory structure
 jar {
     from {
         configurations.runtimeClasspath.collect { file -> file.isDirectory() ? file : zipTree(file) }
@@ -33,7 +34,7 @@ jar {
                 'Implementation-License-Url': 'http://www.apache.org/licenses/LICENSE-2.0.html',
         )
     }
-    destinationDirectory = file("$rootDir/release")
+    destinationDirectory = file("$rootDir/root/home/release")
     archivesBaseName = "app"
 }
 
@@ -45,10 +46,13 @@ sourceSets {
 }
 
 repositories {
+    mavenCentral()
     mavenLocal()
-    jcenter()
     maven { url 'https://kotlin.bintray.com/ktor' }
     maven { url 'https://kotlin.bintray.com/kotlin-js-wrappers' }
+    maven { url = uri("https://dl.bintray.com/kotlin/kotlin-js-wrappers/") }
+    jcenter()
+
 }
 
 // Compiling for JVM 1.8
@@ -63,8 +67,12 @@ dependencies {
     implementation "io.ktor:ktor-server-netty:$ktor_version"
     implementation "ch.qos.logback:logback-classic:$logback_version"
     implementation "io.ktor:ktor-server-core:$ktor_version"
-    implementation "io.ktor:ktor-html-builder:$ktor_version"
     testImplementation "io.ktor:ktor-server-tests:$ktor_version"
+
+    // HTML and CSS support
+    implementation "io.ktor:ktor-html-builder:$ktor_version"
+    //implementation "org.jetbrains:kotlin-css-jvm:1.0.0-pre.31-kotlin-1.2.41"
+    implementation "org.jetbrains.kotlin-wrappers:kotlin-css:1.0.0-pre.332-kotlin-1.6.21"
 
     // Auth
     implementation "io.ktor:ktor-auth:$ktor_version"
@@ -84,6 +92,8 @@ dependencies {
 
     // Network
     implementation "io.ktor:ktor-network-tls:$ktor_version"
+
+    implementation "io.ktor:ktor-freemarker:1.6.8" //$ktor_version"
 }
 
 

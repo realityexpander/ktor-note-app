@@ -20,6 +20,7 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import kotlinx.coroutines.runBlocking
+import kotlinx.html.*
 import kotlinx.html.unsafe
 
 fun Route.notesRoute() {
@@ -376,6 +377,59 @@ fun Route.notesRoute() {
 
         call.getNotesRequest(request, isFromWeb)
     }
+
+    route("/getAllNotesDsl") {
+        //authenticate {
+            get {
+
+                val email = if (call.request.queryParameters["email"] != null) {
+                     call.parameters["email"]!!
+                } else {
+                    ""
+                }
+                val allNotes = getNotesForUserByEmail(email)
+
+                call.respondHtml {
+                    head {
+                        styleLink("/static/css/styles.css")  // from StyleRoute.kt
+                    }
+                    body {
+                        h1 {
+                            +"All Notes"
+                        }
+                        if(email.isBlank()) {
+                            +"No email provided"
+                        } else {
+                            +"Email: $email"
+                        }
+                        for(note in allNotes) {
+                            h3 {
+                                +"${note.title} (Belongs to: ${
+                                    note.owners.map { ownerId ->
+                                        runBlocking {
+                                            getEmailForUserId(ownerId)
+                                        }
+                                    }.joinToString(", ")
+                                })"
+
+                            }
+                            p {
+                                +note.content
+                            }
+                            br
+                        }
+                        div {
+                            h2 {
+
+                                +"Showing rule(\"div h2\") here"
+                            }
+                        }
+                    }
+                }
+            }
+        //}
+    }
+
 }
 
 private suspend fun ApplicationCall.getNotesRequest(
@@ -574,6 +628,10 @@ private suspend fun ApplicationCall.renderNotesListHTML(response: SimpleResponse
         }
     }                                   
     """.trimIndent()
+
+
+
+//// UTILS /////
 
 // Add s to the end of the string if it's greater than 1
 private fun addPostfixS(it: List<Note>) =

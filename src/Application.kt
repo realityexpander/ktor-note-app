@@ -24,6 +24,14 @@ package com.realityexpander
 
 // TODO: Add /keys & *.jks folder to .gitignore
 
+// Secure FTP (sftp) commands:
+// Put folders recursively:
+//   put -R *
+
+// Tree (tree) commands:
+//   tree -phD  = show all files and folders in the current directory with -la and size & Date Modified
+
+
 // Deploy to an Ubuntu 20.04 (Focal) server:
 //
 // From root of project, create the FatJar file of our app:
@@ -124,6 +132,15 @@ package com.realityexpander
 // Allow outgoing connections to a specific IP and port:
 //   sudo ufw allow out to <ip> port <port>
 
+// Check ports in use:
+//   sudo netstat -peanut : grep ":8001"
+//   sudo lsof -i :27017
+//   sudo lsof -i :8002
+// Get command that started a particular process:
+//   ps -fp <PID>
+// Get PID of a command that started processes:
+//   ps -ef | grep java | grep -v grep
+
 
 
 import ch.qos.logback.classic.Level
@@ -132,18 +149,20 @@ import com.realityexpander.data.checkPasswordForEmail
 import com.realityexpander.routes.loginRoute
 import com.realityexpander.routes.notesRoute
 import com.realityexpander.routes.registerRoute
+import com.realityexpander.routes.styleRoute
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.features.*
 import io.ktor.gson.*
+import io.ktor.http.*
+import io.ktor.response.*
 import io.ktor.routing.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.css.CssBuilder
 import org.slf4j.LoggerFactory
-import kotlin.time.Duration.Companion.seconds
-import kotlin.time.DurationUnit
 import kotlin.time.ExperimentalTime
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
@@ -166,7 +185,8 @@ fun Application.module(testing: Boolean = false) {
         configureAuth()
     }
 
-    install(Routing) {           // Our routes are defined in routes.kt
+    install(Routing) {           // Our routes are defined in `/routes`
+        styleRoute()
         registerRoute()
         loginRoute()
         notesRoute()
@@ -198,6 +218,12 @@ var i = 0
 fun myLittleJob(){
     println("Jello world ${++i}")
 }
+
+// Response with CSS
+suspend inline fun ApplicationCall.respondCss(builder: CssBuilder.() -> Unit) {
+    respondText(CssBuilder().apply(builder).toString(), ContentType.Text.CSS)
+}
+
 
 // Setup "basic" authentication using email and password
 private fun Authentication.Configuration.configureAuth() {
