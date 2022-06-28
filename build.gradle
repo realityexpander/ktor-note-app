@@ -125,6 +125,13 @@ task buildAndUploadLatestReleaseWithKeys {
         println "•--> Restart the server..."
         runCommand('ssh root@hostinger systemctl restart ktornoteapp', 5000)
 
+        println "•--> Getting Server status..."
+        runCommand('ssh root@hostinger sleep 3000', 5000)
+        runCommand('ssh root@hostinger systemctl status ktornoteapp', 5000)
+        runCommand('ssh root@hostinger journalctl -u ktornoteapp | tail -n 10', 5000)
+
+
+
     }
 }
 
