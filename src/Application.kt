@@ -24,6 +24,29 @@ package com.realityexpander
 
 // TODO: Add /keys & *.jks folder to .gitignore
 
+// To generate SSH keys for the server (so you dont have to type in server password every time)
+//
+// On local terminal:
+// Generate SSH keys
+//   ssh-keygen -t rsa -m PEM
+//    Enter file in which to save the key (/Users/chrisathanas/.ssh/id_rsa):
+//    # Enter this (the location to save the .ssh key file):
+//      /Users/chrisathanas/.ssh/ktornotekey
+//    # Press enter twice (no passphrase needed)
+//    Your public key has been saved in /Users/chrisathanas/.ssh/ktornotekey.pub
+//
+//   cat /Users/chrisathanas/.ssh/ktornotekey.pub  # This is the public key. We need to copy the private (non-.pub) to the server.
+//   ssh-copy-id -i /Users/chrisathanas/.ssh/ktornotekey root@82.180.173.232  # copy the private key to the server (must use password to login)
+//   # ssh -i /Users/chrisathanas/.ssh/ktornotekey root@82.180.173.232 # connect to the server using the private key
+//
+// To ssh into the server without long reference to `.../.ssh/ktornotekey`, do the following:
+//   nano ~/.ssh/config  # & Add these lines: (to allow ssh/scp/sftp to work without supplying password)
+//
+//     Host <shortcut-name>
+//       Host <server-ip-address>
+//       User root
+//       IdentityFile ~/.ssh/ktornotekey
+
 // Secure FTP (sftp) commands:
 // Put folders recursively:
 //   put -R *
