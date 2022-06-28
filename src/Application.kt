@@ -141,6 +141,38 @@ package com.realityexpander
 // Get PID of a command that started processes:
 //   ps -ef | grep java | grep -v grep
 
+// Traffic to and from mongod instances:
+//   iptables -A INPUT -s <ip-address> -p tcp --destination-port 27017 -m state --state NEW,ESTABLISHED -j ACCEPT
+//   iptables -A OUTPUT -d <ip-address> -p tcp --source-port 27017 -m state --state ESTABLISHED -j ACCEPT
+// Remove traffic from mongod instances:
+//   iptables -L --line-numbers     # lists both INPUT and OUTPUT
+//   iptables -D INPUT <line-number-to-remove>
+
+// To allow external access by MongoDB Compass to your server:
+// Update the /etc/mongod.conf YAML file to allow external access:
+//   sudo nano /etc/mongod.conf
+//   ...
+//   # network interfaces
+//   net:
+//     port: 27017
+//     bindIp: 127.0.0.1, <your-server-ip-address>
+//
+// Restart the MongoDB service:
+//   sudo systemctl restart mongod
+//
+// Log in with Mongo Compass:
+//   New connection:
+//   Select <Advanced Options> twirl-down
+//   Select the <Proxy/SSH> tab
+//   Click the "SSH with Password" button
+//   Enter the following:
+//   SSH Hostname: <your-server-ip-address>
+//   SSH Port: 22
+//   SSH Username: <your-username>   // usually 'root'
+//   SSH Password: <your-password>   // <your-password>
+
+// Monitor IP traffic in real time:
+//   watch --interval 0 'iptables -nvL | grep -v "0     0"'
 
 
 import ch.qos.logback.classic.Level
