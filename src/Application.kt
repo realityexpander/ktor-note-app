@@ -31,6 +31,8 @@ package com.realityexpander
 // Tree (tree) commands:
 //   tree -phD  = show all files and folders in the current directory with -la and size & Date Modified
 
+// How to create an SSH shortcut
+//   https://www.digitalocean.com/community/tutorials/how-to-create-an-ssh-shortcut
 
 // Deploy to an Ubuntu 20.04 (Focal) server:
 //
@@ -50,7 +52,7 @@ package com.realityexpander
 //   cd keys
 //   put ktornoteapp.jks
 //
-// Start the server:
+// Install the app and mongo on our server:
 // Make a new tab in the terminal.
 //   ssh root@<ip address of server>
 //   --> enter password
@@ -61,8 +63,9 @@ package com.realityexpander
 //   sudo apt-get install openjdk-8-jdk
 //   --> Press enter to install java
 //   java -version
+//
 // Install community edition of MongoDB:
-// https://www.mongodb.com/docs/manual/tutorial/install-mongodb-on-ubuntu/
+//   https://www.mongodb.com/docs/manual/tutorial/install-mongodb-on-ubuntu/
 //   // wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
 //   wget -qO - https://www.mongodb.org/static/pgp/server-5.0.asc | sudo apt-key add -
 // Reload the package database:
@@ -110,8 +113,7 @@ package com.realityexpander
 //   journalctl -u ktornoteapp.service | grep -i error | tail -n 10 | less -R -S -X -M -F // show the last 10 errors in a less window, with readline support and scrollback and exit on 'q' and show the cursor at the end of the file and follow the logs
 //   journalctl -u ktornoteapp.service | grep -i error | tail -n 10 | less -R -S -X -M -F -N // show the last 10 errors in a less window, with readline support and scrollback and exit on 'q' and show the cursor at the end of the file and follow the logs and dont show the cursor
 
-// *note: May need to restart the app service after these commands.
-// Disable firewall:
+// Disable firewall: *note: May need to restart the app service after these commands.
 //   sudo apt-get install ufw
 // Get status of firewall:
 //   sudo ufw status
@@ -132,7 +134,7 @@ package com.realityexpander
 // Allow outgoing connections to a specific IP and port:
 //   sudo ufw allow out to <ip> port <port>
 
-// Check ports in use:
+// Check ip ports in use:
 //   sudo netstat -peanut : grep ":8001"
 //   sudo lsof -i :27017
 //   sudo lsof -i :8002
@@ -148,10 +150,14 @@ package com.realityexpander
 //   iptables -L --line-numbers     # lists both INPUT and OUTPUT
 //   iptables -D INPUT <line-number-to-remove>
 
+// Issues with connecting to mongodb:
+//   https://www.mongodb.com/docs/compass/current/troubleshooting/connection-errors/
+//   https://www.mongodb.com/docs/manual/reference/configuration-options/#mongodb-setting-net.bindIp
+
 // To allow external access by MongoDB Compass to your server:
 // Update the /etc/mongod.conf YAML file to allow external access:
 //   sudo nano /etc/mongod.conf
-//   ...
+//
 //   # network interfaces
 //   net:
 //     port: 27017
@@ -166,14 +172,14 @@ package com.realityexpander
 //   Select the <Proxy/SSH> tab
 //   Click the "SSH with Password" button
 //   Enter the following:
-//   SSH Hostname: <your-server-ip-address>
-//   SSH Port: 22
-//   SSH Username: <your-username>   // usually 'root'
-//   SSH Password: <your-password>   // <your-password>
+//    SSH Hostname: <your-server-ip-address>
+//    SSH Port: 22
+//    SSH Username: <your-username>   // usually 'root'
+//    SSH Password: <your-password>   // <your-password>
 
-// Monitor IP traffic in real time:
-//   watch --interval 0 'iptables -nvL | grep -v "0     0"'
-
+// Monitor IP traffic in real time:  https://linuxize.com/post/linux-watch-command/
+//   watch -d --interval 0 'iptables -nvL | grep -v "0     0"'
+//   watch -d=cumulative # Keep highlighting values that have changed
 
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.LoggerContext
