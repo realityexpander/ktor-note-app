@@ -1,6 +1,7 @@
 buildscript {
     repositories {
-        jcenter()
+        mavenCentral()
+        //jcenter()
     }
     
     dependencies {
@@ -50,7 +51,6 @@ repositories {
     mavenLocal()
     maven { url 'https://kotlin.bintray.com/ktor' }
     maven { url 'https://kotlin.bintray.com/kotlin-js-wrappers' }
-    maven { url = uri("https://dl.bintray.com/kotlin/kotlin-js-wrappers/") }
     jcenter()
 
 }
@@ -94,11 +94,51 @@ dependencies {
     implementation "io.ktor:ktor-network-tls:$ktor_version"
 
     implementation "io.ktor:ktor-freemarker:1.6.8" //$ktor_version"
+
 }
 
 
 
+task buildAndUploadLatestReleaseWithKeys {
+    dependsOn("clean", "jar")  // start with fresh build
 
+    doLast {
+        // assumes the SSH keys are in the ~/.ssh directory and
+        // that the ~.ssh/config is configured to use the keys for host "hostinger"
+
+        println "•--> Show current tree in the /home directory..."
+        runCommand('ssh root@hostinger tree -saD home', 5000)
+
+        println "•--> Remove all files from the /release folder..."
+        runCommand('ssh root@hostinger rm home/release/*.*', 5000)
+        runCommand('ssh root@hostinger rm home/release/*', 5000)
+
+        println "•--> Show empty release folder in the /home/release directory..."
+        runCommand('ssh root@hostinger tree -saD home', 5000)
+
+        println "•--> Copy the root/home folder to the server (includes keys and releases)..."
+        runCommand('scp -r ./root/home/ hostinger:/root/', 60000)
+
+        println "•--> Show tree with latest files..."
+        runCommand('ssh root@hostinger tree -saD home', 5000)
+
+        println "•--> Restart the server..."
+        runCommand('ssh root@hostinger systemctl restart ktornoteapp', 5000)
+
+    }
+}
+
+def runCommand(String cmd, Long timeOut) {
+    def sout = new StringBuilder(), serr = new StringBuilder()
+    println("Executing: $cmd")
+
+    def proc = cmd.execute()
+    proc.consumeProcessOutput(sout, serr)
+    proc.waitForOrKill(timeOut)
+
+    println "out> $sout\nerr> $serr"
+    proc.destroy()
+}
 
 
 

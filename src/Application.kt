@@ -24,7 +24,7 @@ package com.realityexpander
 
 // TODO: Add /keys & *.jks folder to .gitignore
 
-// To generate SSH keys for the server (so you dont have to type in server password every time)
+// To generate SSH keys for the server (so you don't have to type in server password every time)
 //
 // On local terminal:
 // Generate SSH keys
@@ -36,10 +36,10 @@ package com.realityexpander
 //    Your public key has been saved in /Users/chrisathanas/.ssh/ktornotekey.pub
 //
 //   cat /Users/chrisathanas/.ssh/ktornotekey.pub  # This is the public key. We need to copy the private (non-.pub) to the server.
-//   ssh-copy-id -i /Users/chrisathanas/.ssh/ktornotekey root@82.180.173.232  # copy the private key to the server (must use password to login)
-//   # ssh -i /Users/chrisathanas/.ssh/ktornotekey root@82.180.173.232 # connect to the server using the private key
+//   ssh-copy-id -i /Users/chrisathanas/.ssh/ktornotekey root@<server-ip>  # copy the private key to the server (must use password to login)
+//   ssh -i /Users/chrisathanas/.ssh/ktornotekey root@<server-ip> # connect to the server using the private key
 //
-// To ssh into the server without long reference to `.../.ssh/ktornotekey`, do the following:
+// To SSH into the server without long reference to `.../.ssh/ktornotekey`, do the following:
 //   nano ~/.ssh/config  # & Add these lines: (to allow ssh/scp/sftp to work without supplying password)
 //
 //     Host <shortcut-name>
@@ -121,6 +121,7 @@ package com.realityexpander
 //   ^s^x                              // Save and Exit
 // Start the service:
 //   sudo systemctl start ktornoteapp  // start the service
+//   sudo systemctl restart ktornoteapp  // start the service
 //   sudo systemctl status ktornoteapp // check if the service is running & show logs, 'q' to quit
 //   sudo systemctl enable ktornoteapp // enable the service to start at boot time
 
@@ -203,6 +204,9 @@ package com.realityexpander
 // Monitor IP traffic in real time:  https://linuxize.com/post/linux-watch-command/
 //   watch -d --interval 0 'iptables -nvL | grep -v "0     0"'
 //   watch -d=cumulative # Keep highlighting values that have changed
+
+// To remove the warning: setlocale: LC_ALL: cannot change locale (en_US.UTF-8):
+//   locale-gen en_US.utf8
 
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.LoggerContext
