@@ -207,14 +207,29 @@ task buildAndUploadLatestReleaseWithKeys {
     // https://stackoverflow.com/questions/7121637/getting-well-formed-output-from-ant-sshexec-in-groovy-script
 }
 
+static void writeFile(String path, String content) {
+    def file = new File(path)
+    def writer = new FileWriter(file)
+    writer.write(content)
+    writer.close()
+}
+
+void execute(String... args) {
+    println "Executing $args...";
+    def proc = args.execute();
+    proc.in.eachLine {line -> println line}
+    proc.err.eachLine {line -> println 'ERROR: ' + line}
+    proc.waitFor()
+}
+
 def createStartAppScript() {
     println("•--> Create the startApp script for app version: " + version)
 
     // CANT CREATE FILES USING ECHO COMMAND FROM GRADLE - left for reference
-    // def cmd = 'echo "#!/bin/bash /usr/bin/java -jar /home/app-' + version + '.jar" > ./root/home/startApp.sh'
+    // Its because the output stream is directed to the console, not the file.
     // def cmd = "echo "hello" > ./root/home/test.txt" // won't create the test.txt file!!!
 
-    def scriptFile = "./root/home/startApp.sh"
+    def scriptFilePath = "./root/home/startApp.sh"
     def script = """  // note: this first line is *intentionally* skipped, to conform to normal script format.
             #!/bin/bash
             /usr/bin/java -jar /root/home/release/app-${version.toString()}.jar
@@ -238,11 +253,11 @@ def createStartAppScript() {
     }.join("\n")
     println("•--> Script: \n" + trimmedScript)
 
-    // Save the script
-    new File(rootDir, scriptFile).text = trimmedScript
+    // Save the script file
+    new File(rootDir, scriptFilePath).text = trimmedScript
 
     // Make the script executable
-    def cmd = "chmod +x $scriptFile"
+    def cmd = "chmod +x $scriptFilePath"
     runCommand(cmd, 1000)
 }
 
