@@ -214,14 +214,6 @@ static void writeFile(String path, String content) {
     writer.close()
 }
 
-void execute(String... args) {
-    println "Executing $args...";
-    def proc = args.execute();
-    proc.in.eachLine {line -> println line}
-    proc.err.eachLine {line -> println 'ERROR: ' + line}
-    proc.waitFor()
-}
-
 def createStartAppScript() {
     println("•--> Create the startApp script for app version: " + version)
 
