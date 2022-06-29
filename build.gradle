@@ -16,46 +16,30 @@ apply plugin: 'kotlin'
 apply plugin: 'application'
 
 group 'com.realityexpander'
-version '0.1.1'
+version '0.1.2'
 mainClassName = "io.ktor.server.netty.EngineMain"
-def appName = 'ktor-note-app'
-
 def appManifest = manifest().effectiveManifest
-//        = {
-//    attributes(
-//            'Implementation-Title': $ { appName },
-//            "Main-Class": mainClassName,
-//            'Implementation-Version': $ { version },
-//            'Implementation-Vendor': 'com.realityexpander',
-//            'Implementation-Vendor-Id': 'com.realityexpander',
-//            'Implementation-Vendor-Url': 'https://github.com/realityexpander',
-//            'Implementation-Description': $ { appName },
-//            'Implementation-License': 'Apache-2.0',
-//            'Implementation-License-Url': 'http://www.apache.org/licenses/LICENSE-2.0.html',
-//    )
-//}
 
-// Generate a jar file - puts results into `rootDir/root/home/release` directory
+// Generate a jar file - puts results into `./root/home/release` directory
 // This directory structure reflects the server directory structure
 jar {
-
     from {
         configurations.runtimeClasspath.collect { file -> file.isDirectory() ? file : zipTree(file) }
     }
     manifest {
-
-        def manifest = attributes(
-                'Implementation-Title': "'${appName}'",
-                'Implementation-Version': "'${version}'",
+        appManifest = attributes(
+                'Implementation-Title': "'${ project.name }'",
+                'Implementation-Version': "'${ project.version }'",
                 "Main-Class": mainClassName,
                 'Implementation-Vendor': 'com.realityexpander',
                 'Implementation-Vendor-Id': 'com.realityexpander',
                 'Implementation-Vendor-Url': 'https://github.com/realityexpander',
-                'Implementation-Description': "'${ appName }'",
+                'Implementation-Description': "'${ project.name }'",
                 'Implementation-License': 'Apache-2.0',
                 'Implementation-License-Url': 'http://www.apache.org/licenses/LICENSE-2.0.html',
+                'SOME-RANDOM-ATTRIBUTE': 'ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789012345678901234567890'
         )
-        appManifest = manifest
+        appManifest
     }
     destinationDirectory = file("$rootDir/root/home/release")
     archivesBaseName = "app"
@@ -116,46 +100,64 @@ dependencies {
     implementation "io.ktor:ktor-network-tls:$ktor_version"
 
     implementation "io.ktor:ktor-freemarker:1.6.8" //$ktor_version"
-
 }
 
 
-task getAppAttributes {
+task getAppProperties {
     dependsOn("jar")
 
     doLast {
-//        println("•--> Get the manifest properties from a file")
-//        def manifestFile = "root/home/release/app-${version}.jar.manifest".toString()
-//        def manifest = new File(rootDir, manifestFile)
-//        def manifestProperties = new Properties()
-//        manifest.newInputStream().use {
-//            manifestProperties.load(it)
-//        }
-//        println("•--> Manifest properties:")
-//        manifestProperties.each { key, value ->
-//            println("•--> " + key + ": " + value)
-//        }
+        println("•--> Get the manifest properties from the app jar file")
+        def manifestFile = "root/home/release/app-${version}.jar".toString()
+        def manifestStr = runCommand("unzip -q -c ${manifestFile} META-INF/MANIFEST.MF", 1000, false).toString()
+        def manifest = reconstructContinuationLines(manifestStr)
 
-        def dontInclude = ['class', 'active', 'properties', 'plugins']
-        println appManifest.properties.attributes.each { key, value ->
-            if (!dontInclude.contains(key)) {
-                println("•--> " + key + ": " + value)
-            }
+        def manifestProperties = new Properties()
+        manifestProperties.load(new StringReader(manifest))
+
+        println("\n•--> Manifest properties:")
+        manifestProperties.each { key, value ->
+            println(" " + key + ": " + value)
         }
-//        println manifest().properties
-//        println manifest().effectiveManifest.properties
-//                .sort{it.key }
-//                .collect{it}
-//                .findAll{!dontInclude.contains(it.key)}
-//                .join('\n')
 
-//        def include = ['effectiveManifest', 'manifest']
-//        println manifest().properties
-//                .sort{it.key }
-//                .collect{it}
-//                .findAll{include.contains(it.key)}
-//                .join('\n')
+//        // Gets properties from the global variable
+//        def dontInclude = ['class', 'active', 'properties', 'plugins']
+//        appManifest.properties.attributes.each { key, value ->
+//            if (!dontInclude.contains(key)) {
+//                println("•--> " + key + ": " + value)
+//            }
+//        }
+
+        println()
+
+        // Gets properties from the global variable
+        println("•--> appManifest: ['Implementation-Version']: " +
+                appManifest.properties.attributes['Implementation-Version'])
+
+        // Gets properties from the jar file
+        println("•--> manifestProperties: ['Implementation-Version']: " +
+                manifestProperties['Implementation-Version'])
     }
+}
+
+// JAR/ZIP Manifests have lines limited to 72 characters.
+// Lines longer than 72 characters are broken into multiple lines,
+//   with a space on the front of the extra lines.
+// This function reconstructs continuation lines.
+static def String reconstructContinuationLines(String lines) {
+    def linesArr = lines.split("\n")
+    def manifestRebuilt = ""
+
+    linesArr.each { line ->
+        // println("•--> Line: $line")
+        if (line.substring(0,1) != ' ') {  // check for continuation line (space at the beginning)
+            manifestRebuilt += "\n" + line
+        } else {
+            manifestRebuilt += line.substring(1)
+        }
+    }
+
+    return manifestRebuilt
 }
 
 
@@ -195,8 +197,14 @@ task buildAndUploadLatestReleaseWithKeys {
         runCommand('ssh root@hostinger sleep 3000', 5000)
         runCommand('ssh root@hostinger systemctl status ktornoteapp', 5000)
         runCommand('ssh root@hostinger journalctl -u ktornoteapp | tail -n 10', 5000)
-
     }
+
+    // Alternative to using bash commands:
+    // https://fedidat.com/230-ssh-and-scp-in-gradle/
+    // https://stackoverflow.com/questions/25494396/android-gradle-ant-scp-task
+    // https://ant.apache.org/manual/Tasks/sshexec.html
+    // https://gradle-ssh-plugin.github.io/docs/
+    // https://stackoverflow.com/questions/7121637/getting-well-formed-output-from-ant-sshexec-in-groovy-script
 }
 
 def createStartAppScript() {
@@ -230,6 +238,7 @@ def createStartAppScript() {
     }.join("\n")
     println("•--> Script: \n" + trimmedScript)
 
+    // Save the script
     new File(rootDir, scriptFile).text = trimmedScript
 
     // Make the script executable
@@ -237,7 +246,7 @@ def createStartAppScript() {
     runCommand(cmd, 1000)
 }
 
-def runCommand(String cmd, Long timeOut) {
+def String runCommand(String cmd, Long timeOut, Boolean printOutput = true) {
     def sout = new StringBuilder(), serr = new StringBuilder()
     println("Executing: $cmd")
 
@@ -245,8 +254,10 @@ def runCommand(String cmd, Long timeOut) {
     proc.consumeProcessOutput(sout, serr)
     proc.waitForOrKill(timeOut)
 
-    println "out> $sout\nerr> $serr"
+    if (printOutput) println "out> $sout\nerr> $serr"
     proc.destroy()
+
+    return sout.toString()
 }
 
 
