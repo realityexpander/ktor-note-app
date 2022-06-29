@@ -231,7 +231,7 @@ def createStartAppScript() {
                 sdf.setTimeZone(TimeZone.getTimeZone("UTC"))
                 sdf.format(new Date()).toString() + " UTC"
             }
-            # Application-name: Ktor Note app
+            # Application-name: ${ project.name }
             # Application-version: ${version.toString()}
         """
     // # Revision: ${grgit.head().abbreviatedId} // left for reference
