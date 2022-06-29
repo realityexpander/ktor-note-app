@@ -103,7 +103,7 @@ dependencies {
 }
 
 
-task getAppProperties {
+task getAppManifest {
     dependsOn("jar")
 
     doLast {
@@ -120,7 +120,7 @@ task getAppProperties {
             println(" " + key + ": " + value)
         }
 
-//        // Gets properties from the global variable
+//        // Gets manifest properties from the global variable
 //        def dontInclude = ['class', 'active', 'properties', 'plugins']
 //        appManifest.properties.attributes.each { key, value ->
 //            if (!dontInclude.contains(key)) {
@@ -130,11 +130,11 @@ task getAppProperties {
 
         println()
 
-        // Gets properties from the global variable
+        // Gets manifest properties from the global variable
         println("•--> appManifest: ['Implementation-Version']: " +
                 appManifest.properties.attributes['Implementation-Version'])
 
-        // Gets properties from the jar file
+        // Gets manifest properties from the jar file
         println("•--> manifestProperties: ['Implementation-Version']: " +
                 manifestProperties['Implementation-Version'])
     }
