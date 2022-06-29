@@ -1,3 +1,6 @@
+import java.sql.Time
+import java.text.SimpleDateFormat
+
 buildscript {
     repositories {
         mavenCentral()
@@ -13,27 +16,46 @@ apply plugin: 'kotlin'
 apply plugin: 'application'
 
 group 'com.realityexpander'
-version '0.0.1'
+version '0.1.1'
 mainClassName = "io.ktor.server.netty.EngineMain"
+def appName = 'ktor-note-app'
+
+def appManifest = manifest().effectiveManifest
+//        = {
+//    attributes(
+//            'Implementation-Title': $ { appName },
+//            "Main-Class": mainClassName,
+//            'Implementation-Version': $ { version },
+//            'Implementation-Vendor': 'com.realityexpander',
+//            'Implementation-Vendor-Id': 'com.realityexpander',
+//            'Implementation-Vendor-Url': 'https://github.com/realityexpander',
+//            'Implementation-Description': $ { appName },
+//            'Implementation-License': 'Apache-2.0',
+//            'Implementation-License-Url': 'http://www.apache.org/licenses/LICENSE-2.0.html',
+//    )
+//}
 
 // Generate a jar file - puts results into `rootDir/root/home/release` directory
 // This directory structure reflects the server directory structure
 jar {
+
     from {
         configurations.runtimeClasspath.collect { file -> file.isDirectory() ? file : zipTree(file) }
     }
     manifest {
-        attributes (
-                'Implementation-Title': 'Ktor-server-notes',
+
+        def manifest = attributes(
+                'Implementation-Title': "'${appName}'",
+                'Implementation-Version': "'${version}'",
                 "Main-Class": mainClassName,
-                'Implementation-Version': '0.0.1',
                 'Implementation-Vendor': 'com.realityexpander',
                 'Implementation-Vendor-Id': 'com.realityexpander',
                 'Implementation-Vendor-Url': 'https://github.com/realityexpander',
-                'Implementation-Description': 'Ktor-server-notes',
+                'Implementation-Description': "'${ appName }'",
                 'Implementation-License': 'Apache-2.0',
                 'Implementation-License-Url': 'http://www.apache.org/licenses/LICENSE-2.0.html',
         )
+        appManifest = manifest
     }
     destinationDirectory = file("$rootDir/root/home/release")
     archivesBaseName = "app"
@@ -98,6 +120,44 @@ dependencies {
 }
 
 
+task getAppAttributes {
+    dependsOn("jar")
+
+    doLast {
+//        println("•--> Get the manifest properties from a file")
+//        def manifestFile = "root/home/release/app-${version}.jar.manifest".toString()
+//        def manifest = new File(rootDir, manifestFile)
+//        def manifestProperties = new Properties()
+//        manifest.newInputStream().use {
+//            manifestProperties.load(it)
+//        }
+//        println("•--> Manifest properties:")
+//        manifestProperties.each { key, value ->
+//            println("•--> " + key + ": " + value)
+//        }
+
+        def dontInclude = ['class', 'active', 'properties', 'plugins']
+        println appManifest.properties.attributes.each { key, value ->
+            if (!dontInclude.contains(key)) {
+                println("•--> " + key + ": " + value)
+            }
+        }
+//        println manifest().properties
+//        println manifest().effectiveManifest.properties
+//                .sort{it.key }
+//                .collect{it}
+//                .findAll{!dontInclude.contains(it.key)}
+//                .join('\n')
+
+//        def include = ['effectiveManifest', 'manifest']
+//        println manifest().properties
+//                .sort{it.key }
+//                .collect{it}
+//                .findAll{include.contains(it.key)}
+//                .join('\n')
+    }
+}
+
 
 task buildAndUploadLatestReleaseWithKeys {
     dependsOn("clean", "jar")  // start with fresh build
@@ -109,18 +169,24 @@ task buildAndUploadLatestReleaseWithKeys {
         println "•--> Show current tree in the /home directory..."
         runCommand('ssh root@hostinger tree -saD home', 5000)
 
-        println "•--> Remove all files from the /release folder..."
-        runCommand('ssh root@hostinger rm home/release/*.*', 5000)
-        runCommand('ssh root@hostinger rm home/release/*', 5000)
+        println "•--> Remove old files from the /home folder..."
+        // runCommand('ssh root@hostinger rm home/release/*.*', 5000) // leave release folder to allow for easy rollbacks
+        // runCommand('ssh root@hostinger rm home/release/*', 5000) // needed only for files w/o extensions - left for reference
+        runCommand('ssh root@hostinger rm home/*.*', 5000)
 
         println "•--> Show empty release folder in the /home/release directory..."
         runCommand('ssh root@hostinger tree -saD home', 5000)
 
-        println "•--> Copy the root/home folder to the server (includes keys and releases)..."
+        createStartAppScript()
+
+        println "•--> Copy the root/home folder to the server (includes keys and releases, runAppScript)..."
         runCommand('scp -r ./root/home/ hostinger:/root/', 60000)
 
         println "•--> Show tree with latest files..."
         runCommand('ssh root@hostinger tree -saD home', 5000)
+
+        println "•--> Reload the daemons (just in case)..."
+        runCommand('ssh root@hostinger systemctl daemon-reload', 5000)
 
         println "•--> Restart the server..."
         runCommand('ssh root@hostinger systemctl restart ktornoteapp', 5000)
@@ -130,9 +196,45 @@ task buildAndUploadLatestReleaseWithKeys {
         runCommand('ssh root@hostinger systemctl status ktornoteapp', 5000)
         runCommand('ssh root@hostinger journalctl -u ktornoteapp | tail -n 10', 5000)
 
-
-
     }
+}
+
+def createStartAppScript() {
+    println("•--> Create the startApp script for app version: " + version)
+
+    // CANT CREATE FILES USING ECHO COMMAND FROM GRADLE - left for reference
+    // def cmd = 'echo "#!/bin/bash /usr/bin/java -jar /home/app-' + version + '.jar" > ./root/home/startApp.sh'
+    // def cmd = "echo "hello" > ./root/home/test.txt" // won't create the test.txt file!!!
+
+    def scriptFile = "./root/home/startApp.sh"
+    def script = """  // note: this first line is *intentionally* skipped, to conform to normal script format.
+            #!/bin/bash
+            /usr/bin/java -jar /root/home/release/app-${version.toString()}.jar
+            
+            # Build-time: ${
+                def sdf = new SimpleDateFormat("EEE MM-dd-yyyy HH:mm:ss")
+                sdf.setTimeZone(TimeZone.getTimeZone("UTC"))
+                sdf.format(new Date()).toString() + " UTC"
+            }
+            # Application-name: Ktor Note app
+            # Application-version: ${version.toString()}
+        """
+    // # Revision: ${grgit.head().abbreviatedId} // left for reference
+
+    // Trim the script to remove any leading or trailing whitespace and the first line
+    def trimmedScript = ""
+    script.toString().split("\n").eachWithIndex { line, i ->
+        if(i>0) { // skip the first line
+            trimmedScript += line.stripIndent().trim() + "\n"
+        }
+    }.join("\n")
+    println("•--> Script: \n" + trimmedScript)
+
+    new File(rootDir, scriptFile).text = trimmedScript
+
+    // Make the script executable
+    def cmd = "chmod +x $scriptFile"
+    runCommand(cmd, 1000)
 }
 
 def runCommand(String cmd, Long timeOut) {

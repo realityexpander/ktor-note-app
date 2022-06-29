@@ -113,7 +113,7 @@ package com.realityexpander
 //   RestartSec=5                      // how long to wait before restarting the service
 //   Restart=always                    // restart the service if it fails to start
 //   User=root                         // run the service as root user
-//   // ExecStart=/home/ktornoteapp.sh // good shortcut for absolute path (** -> dont add this commented line)
+//   // ExecStart=/root/home/release/startApp.sh // good shortcut for absolute path (** -> dont add this commented line)
 //   ExecStart=/usr/bin/java -jar /home/app-0.0.1.jar
 //
 //   [Install]
