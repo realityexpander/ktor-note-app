@@ -6,7 +6,7 @@ package com.realityexpander
 // LetsEncypt - signs certificates for a domain for free (but we don't have a domain yet)
 // https://letsencrypt.org/certificates/
 
-// Self-generate certificates (,jks) for our app and server (won't be accepted by general websites, but good for our testing)
+// Self-generate certificates (.jks) for our app and server (won't be accepted by general websites, but good for our testing)
 // For SSL/HTTPS traffic.
 // Set up the server folder structure locally. From root folder:
 //   take root    # create the root folder locally (not used on the server)
@@ -24,12 +24,10 @@ package com.realityexpander
 //     -> enter key password: <**PRIVATE_KEY_PASSWORD_NOT_NECESSARY**>    <-- privateKeyPassword (may be same as keystore password)
 //     -> enter key password again: <**PRIVATE_KEY_PASSWORD_NOT_NECESSARY**>
 
-// TODO: Add /keys & *.jks folder to .gitignore
-
 // To generate SSH keys for the server (so you don't have to type in server password every time)
 //
 // On local terminal:
-// Generate SSH keys
+// Generate SSH keys:
 //   ssh-keygen -t rsa -m PEM
 //    Enter file in which to save the key (/Users/chrisathanas/.ssh/id_rsa):
 //    # Enter this (the location to save the .ssh key file):
@@ -219,6 +217,8 @@ package com.realityexpander
 //   Show app manifest:
 //    ./gradle getAppManifest
 
+// GOTTA BE CAREFUL WITH THE KEYS! Make sure you never check in your *.jks file to GitHub!
+//
 // All your data is a backed up. You must pay 0.043 BTC to 1Kz6v4B5CawcnL8jrUvHsvzQv5Yq4fbsSv
 // 48 hours for recover it. After 48 hours expiration we will leaked and exposed all your data.
 // In case of refusal to pay, we will contact the General Data Protection Regulation, GDPR and
