@@ -217,6 +217,16 @@ package com.realityexpander
 //   Show app manifest:
 //    ./gradle getAppManifest
 
+// All your data is a backed up. You must pay 0.043 BTC to 1Kz6v4B5CawcnL8jrUvHsvzQv5Yq4fbsSv
+// 48 hours for recover it. After 48 hours expiration we will leaked and exposed all your data.
+// In case of refusal to pay, we will contact the General Data Protection Regulation, GDPR and
+// notify them that you store user data in an open form and is not safe. Under the rules of the law,
+// you face a heavy fine or arrest and your base dump will be dropped from our server!
+// You can buy bitcoin here, does not take much time to buy https://localbitcoins.com or
+// https://buy.moonpay.io/ After paying write to me in the mail with your DB
+// IP: recmydb+1t55h@onionmail.org and/or mariadb@mailnesia.com and you will receive a
+// link to download your database dump.
+
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.LoggerContext
 import com.realityexpander.data.checkPasswordForEmail
