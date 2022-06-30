@@ -52,12 +52,13 @@ package com.realityexpander
 //   put -R *
 
 // Tree (tree) commands:
-//   tree -phD  = show all files and folders in the current directory with -la and size & Date Modified
+//   tree -phD = show all files and folders in the current directory with -la and human-readable size & Date Modified
+//   tree -saD = show hidden files & dates
 
 // How to create an SSH shortcut
 //   https://www.digitalocean.com/community/tutorials/how-to-create-an-ssh-shortcut
 
-// Deploy to an Ubuntu 20.04 (Focal) server:
+// Deploy to an Ubuntu 20.04 (Focal) server: (also works with Ubuntu 18.04.6 LTS (GNU/Linux 4.15.0 x86_64))
 //
 // From root of project, create the FatJar file of our app:
 //   ./gradle jar
@@ -167,7 +168,7 @@ package com.realityexpander
 // Get PID of a command that started processes:
 //   ps -ef | grep java | grep -v grep
 
-// Traffic to and from mongod instances:
+// Add Traffic to and from mongod instances:
 //   iptables -A INPUT -s <ip-address> -p tcp --destination-port 27017 -m state --state NEW,ESTABLISHED -j ACCEPT
 //   iptables -A OUTPUT -d <ip-address> -p tcp --source-port 27017 -m state --state ESTABLISHED -j ACCEPT
 // Remove traffic from mongod instances:
@@ -189,7 +190,7 @@ package com.realityexpander
 //
 // Restart the MongoDB service:
 //   sudo systemctl restart mongod
-//
+
 // Log in with Mongo Compass:
 //   New connection:
 //   Select <Advanced Options> twirl-down
@@ -205,8 +206,16 @@ package com.realityexpander
 //   watch -d --interval 0 'iptables -nvL | grep -v "0     0"'
 //   watch -d=cumulative # Keep highlighting values that have changed
 
-// To remove the warning: setlocale: LC_ALL: cannot change locale (en_US.UTF-8):
+// To remove the server warning: setlocale: LC_ALL: cannot change locale (en_US.UTF-8):
 //   locale-gen en_US.utf8
+
+// Build commands
+//   Build and upload app to server:
+//    ./gradle buildAndUploadLatestReleaseWithKeys
+//   Build jar only:
+//    ./gradle jar
+//   Show app manifest:
+//    ./gradle getAppManifest
 
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.LoggerContext
