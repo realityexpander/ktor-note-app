@@ -224,7 +224,7 @@ def createStartAppScript() {
     def scriptFilePath = "./root/home/startApp.sh"
     def script = """  // note: this first line is *intentionally* skipped, to conform to normal script format.
             #!/bin/bash
-            /usr/bin/java -jar /root/home/release/app-${version.toString()}.jar
+            /usr/bin/java -jar /root/home/release/app-${ version.toString() }.jar
             
             # Build-time: ${
                 def sdf = new SimpleDateFormat("EEE MM-dd-yyyy HH:mm:ss")
@@ -232,7 +232,7 @@ def createStartAppScript() {
                 sdf.format(new Date()).toString() + " UTC"
             }
             # Application-name: ${ project.name }
-            # Application-version: ${version.toString()}
+            # Application-version: ${ version.toString() }
         """
     // # Revision: ${grgit.head().abbreviatedId} // left for reference
 

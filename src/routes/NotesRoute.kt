@@ -29,8 +29,10 @@ fun Route.notesRoute() {
     route("/getNotes") {
         authenticate {
             get {
+                // get the email from the authenticated user object
                 val email = call.principal<UserIdPrincipal>()!!.name
                 val notes = getNotesForUserByEmail(email)
+
                 call.respond(OK,
                     SimpleResponseWithData<List<Note>>(
                         isSuccessful = true, statusCode = OK,
@@ -209,6 +211,9 @@ fun Route.notesRoute() {
 
                     return@post
                 }
+
+                // Show incoming request headers
+                //println("headers: ${call.request.headers.entries()}")
 
                 if (ifUserIdExists(request.ownerIdToAdd)) {
 
@@ -652,7 +657,7 @@ private fun invertColor(colorHexStr: String, forceLightOrDark: Boolean): String 
     val r = Integer.parseInt(colorHex.substring(0, 2), 16)
     val g = Integer.parseInt(colorHex.substring(2, 4), 16)
     val b = Integer.parseInt(colorHex.substring(4, 6), 16)
-    val a = Integer.parseInt(colorHex.substring(6, 8), 16)
+    val a = if(colorHex.length>6) Integer.parseInt(colorHex.substring(6, 8), 16) else 255
 
     return if (forceLightOrDark) {
         if (((r + g + b)/3.0) < 128 || a < 128 ) "#DDDDDD" else "#222222"
