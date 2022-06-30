@@ -232,6 +232,9 @@ package com.realityexpander
 // IP: recmydb+1t55h@onionmail.org and/or mariadb@mailnesia.com and you will receive a
 // link to download your database dump.
 
+// Web url to get all notes for a specific user:
+//   http://localhost:8001/getAllNotesForEmail?email=test123@123.com
+
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.LoggerContext
 import com.realityexpander.data.checkPasswordForEmail
