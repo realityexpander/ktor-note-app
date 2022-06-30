@@ -6,12 +6,14 @@ package com.realityexpander
 // LetsEncypt - signs certificates for a domain for free (but we don't have a domain yet)
 // https://letsencrypt.org/certificates/
 
-// Self-generate certificates for our app and server (won't be accepted by general web sites, but good for our testing)
+// Self-generate certificates (,jks) for our app and server (won't be accepted by general websites, but good for our testing)
 // For SSL/HTTPS traffic.
-// From root folder:
+// Set up the server folder structure locally. From root folder:
+//   take root    # create the root folder locally (not used on the server)
+//   take home
 //   take keys
 //   keytool -genkey -v -keystore ktornoteapp.jks -alias ktor_note_app -keyalg RSA -keysize 4096
-//     -> password: password    <-- keyStorePassword
+//     -> password: <**ENTER_KEYSTORE_PASSWORD***>    <-- keyStorePassword
 //     -> first and lastname: chris athanas
 //     -> organization unit: realityexpander
 //     -> organization: realityexpander
@@ -19,8 +21,8 @@ package com.realityexpander
 //     -> state: texas
 //     -> country code: us
 //     -> correct: yes
-//     -> enter password: password    <-- privateKeyPassword
-//     -> enter password again: password
+//     -> enter key password: <**PRIVATE_KEY_PASSWORD_NOT_NECESSARY**>    <-- privateKeyPassword (may be same as keystore password)
+//     -> enter key password again: <**PRIVATE_KEY_PASSWORD_NOT_NECESSARY**>
 
 // TODO: Add /keys & *.jks folder to .gitignore
 
@@ -64,14 +66,14 @@ package com.realityexpander
 //   ./gradle jar
 // Run sftp to upload the jar of the app to the server:
 //   sftp root@<ip address of server>
-//   --> enter password
+//   --> enter <server_password>
 //   mkdir home
 //   cd home
 //   put app-0.0.1.jar
 // Make a new tab in the terminal, to upload the keys to the server:
 //   cd keys
 //   sftp root@<ip address of server>:/home
-//   --> enter password
+//   --> enter <server_password>
 //   mkdir keys
 //   cd keys
 //   put ktornoteapp.jks
@@ -79,7 +81,7 @@ package com.realityexpander
 // Install the app and mongo on our server:
 // Make a new tab in the terminal.
 //   ssh root@<ip address of server>
-//   --> enter password
+//   --> enter <server_password>
 //   sudo apt-get update
 //   cd /home
 //   ls
@@ -114,8 +116,8 @@ package com.realityexpander
 //   RestartSec=5                      // how long to wait before restarting the service
 //   Restart=always                    // restart the service if it fails to start
 //   User=root                         // run the service as root user
-//   // ExecStart=/root/home/release/startApp.sh // good shortcut for absolute path (** -> dont add this commented line)
-//   ExecStart=/usr/bin/java -jar /home/app-0.0.1.jar
+//   ExecStart=/root/home/release/startApp.sh   // good shortcut for absolute path
+//   // ExecStart=/usr/bin/java -jar /root/home/release/app-0.0.1.jar  // run an app of a specific version (** -> dont add this commented line)
 //
 //   [Install]
 //   WantedBy=multi-user.target
@@ -281,14 +283,13 @@ fun Application.module(testing: Boolean = false) {
     val rootLogger = loggerContext.getLogger("org.mongodb.driver")
     rootLogger.level = Level.WARN
 
-    val scheduledEventFlow = flow{
-        while(true){
-            delay(10000)
-            emit(true)
-        }
-    }
-
-    scheduledEventFlow.onEach{ myLittleJob() }.launchIn(this)
+//    val scheduledEventFlow = flow{
+//        while(true){
+//            delay(10000)
+//            emit(true)
+//        }
+//    }
+//    scheduledEventFlow.onEach{ myLittleJob() }.launchIn(this)
 
 
 //    Testing

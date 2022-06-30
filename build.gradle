@@ -196,7 +196,7 @@ task buildAndUploadLatestReleaseWithKeys {
         println "•--> Get Server status..."
         runCommand('ssh root@hostinger sleep 3000', 5000)
         runCommand('ssh root@hostinger systemctl status ktornoteapp', 5000)
-        runCommand('ssh root@hostinger journalctl -u ktornoteapp | tail -n 10', 5000)
+        runCommand('ssh root@hostinger journalctl -u ktornoteapp | tail -n 20', 5000)
     }
 
     // Alternative to using bash commands:
