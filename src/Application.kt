@@ -9,10 +9,10 @@ package com.realityexpander
 // LetsEncypt - signs certificates for a domain for free (but we don't have a domain yet)
 // https://letsencrypt.org/certificates/
 
-// Self-generate certificates (.jks) for our app and server (won't be accepted by general websites, but good for our testing)
-// For SSL/HTTPS traffic.
+// --> For SSL/HTTPS traffic.
+// Self-generate certificates (.jks) for our server app (won't be accepted by general websites, but good for our testing)
 // Set up the server folder structure locally. From root folder:
-//   take root    # create the root folder locally (not used on the server)
+//   take root    # create the `/root` folder locally (not used on the server)
 //   take home
 //   take keys
 //   keytool -genkey -v -keystore ktornoteapp.jks -alias ktor_note_app -keyalg RSA -keysize 4096
@@ -27,28 +27,28 @@ package com.realityexpander
 //     -> enter key password: <**PRIVATE_KEY_PASSWORD_NOT_NECESSARY**>    <-- privateKeyPassword (may be same as keystore password)
 //     -> enter key password again: <**PRIVATE_KEY_PASSWORD_NOT_NECESSARY**>
 
-// To generate SSH keys for the server (so you don't have to type in server password every time)
-//
+// --> For LOGIN to server.
+// To generate SSH keys for the login to server (so you don't have to type in server password every time)
 // On local terminal:
 // Generate SSH keys:
 //   ssh-keygen -t rsa -m PEM
 //    Enter file in which to save the key (/Users/chrisathanas/.ssh/id_rsa):
 //    # Enter this (the location to save the .ssh key file):
-//      /Users/chrisathanas/.ssh/ktornotekey
+//      /Users/chrisathanas/.ssh/hostinger_rsa
 //    # Press enter twice (no passphrase needed)
-//    Your public key has been saved in /Users/chrisathanas/.ssh/ktornotekey.pub
+//    Your public key has been saved in /Users/chrisathanas/.ssh/hostinger_rsa.pub
 //
-//   cat /Users/chrisathanas/.ssh/ktornotekey.pub  # This is the public key. We need to copy the private (non-.pub) to the server.
-//   ssh-copy-id -i /Users/chrisathanas/.ssh/ktornotekey root@<server-ip>  # copy the private key to the server (must use password to login)
-//   ssh -i /Users/chrisathanas/.ssh/ktornotekey root@<server-ip> # connect to the server using the private key
+//   cat /Users/chrisathanas/.ssh/hostinger_rsa.pub  # This is the public key. We need to copy the private (non-.pub) to the server.
+//   ssh-copy-id -i /Users/chrisathanas/.ssh/hostinger_rsa root@<server-ip>  # copy the private key to the server (must use password to login)
+//   ssh -i /Users/chrisathanas/.ssh/hostinger_rsa root@<server-ip> # connect to the server using the private key
 //
-// To SSH into the server without long reference to `.../.ssh/ktornotekey`, do the following:
+// To SSH into the server without long reference to `.../.ssh/hostinger_rsa`, do the following:
 //   nano ~/.ssh/config  # & Add these lines: (to allow ssh/scp/sftp to work without supplying password)
 //
 //     Host <shortcut-name>
 //       Host <server-ip-address>
 //       User root
-//       IdentityFile ~/.ssh/ktornotekey
+//       IdentityFile ~/.ssh/hostinger_rsa
 
 // Secure FTP (sftp) commands:
 // Put folders recursively:
@@ -71,6 +71,7 @@ package com.realityexpander
 //   mkdir home
 //   cd home
 //   put app-0.0.1.jar
+//
 // Make a new tab in the terminal, to upload the keys to the server:
 //   cd keys
 //   sftp root@<ip address of server>:/home
