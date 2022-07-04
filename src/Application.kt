@@ -213,6 +213,9 @@ package com.realityexpander
 // To remove the server warning: setlocale: LC_ALL: cannot change locale (en_US.UTF-8):
 //   locale-gen en_US.utf8
 
+// Kill the user session:
+//   sudo pkill -u <username>
+
 // Build commands
 //   Build and upload app to server:
 //    ./gradle buildAndUploadLatestReleaseWithKeys
@@ -235,6 +238,8 @@ package com.realityexpander
 
 // Web url to get all notes for a specific user:
 //   http://localhost:8001/getAllNotesForEmail?email=test123@123.com
+
+
 
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.LoggerContext
