@@ -239,6 +239,35 @@ package com.realityexpander
 // Web url to get all notes for a specific user:
 //   http://localhost:8001/getAllNotesForEmail?email=test123@123.com
 
+// MongoDB commands:
+//help                         ;show help
+//show dbs                     ;show database names
+//show collections             ;show collections in current database
+//show users                   ;show users in current database
+//show profile                 ;show most recent system.profile entries with time >= 1ms
+//use <db name>                ;set curent database to <db name>
+//
+//db.addUser (username, password)
+//db.removeUser(username)
+//
+//db.cloneDatabase(fromhost)
+//db.copyDatabase(fromdb, todb, fromhost)
+//db.createCollection(name, { size : ..., capped : ..., max : ... } )
+//
+//db.getName()
+//db.printCollectionStats()
+//
+//db.currentOp() ;displays the current operation in the db
+//
+//db.getProfilingLevel()
+//db.setProfilingLevel(level) ;0=off 1=slow 2=all
+//
+//db.getReplicationInfo()
+//db.printReplicationInfo()
+//db.printSlaveReplicationInfo()
+//db.repairDatabase()
+//
+//db.version() ;current version of the server
 
 
 import ch.qos.logback.classic.Level
