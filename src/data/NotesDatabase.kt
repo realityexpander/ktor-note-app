@@ -12,7 +12,8 @@ import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.eq
 import org.litote.kmongo.reactivestreams.KMongo
 
-val env = System.getenv()
+// Get Environment Variables
+val env: MutableMap<String, String> = System.getenv()
 private val mongoSettings: Map<String, String> = mapOf(
     "MONGO_USERNAME"         to (env["MONGO_USERNAME"]         ?: ""),
     "MONGO_PASSWORD"         to (env["MONGO_PASSWORD"]         ?: ""),
@@ -25,25 +26,23 @@ private val mongoSettings: Map<String, String> = mapOf(
     "MONGO_AUTH_SOURCE"      to (env["MONGO_AUTH_SOURCE"]      ?: "admin"),
 )
 
-// REFERENCE: server full client connection string (for app running on the server):
-// from MongoCompass: mongodb://theAdmin:Zapper1000%25%5E%26@localhost:27017/?authMechanism=DEFAULT&authSource=admin
-
+// REFERENCE: server full client connection raw string (for app running on the server):
+// from MongoCompass: mongodb://AdminUsername:PasswordXXXX%25%5E%26@localhost:27017/?authMechanism=DEFAULT&authSource=admin
+//
 // Use this way for raw connection string:
-// HOST=theAdmin:Zapper1000%25%5E%26@localhost  // Note: uses ascii encoded username and password
-// POSTFIX=/?authSource=admin                   // Note: stripped out the "authmechanism" param
+// MONGO_HOST=AdminUsername:PasswordXXXX%25%5E%26@localhost       // Note: uses ascii encoded username and password
+// MONGO_HOST_POSTFIX=/?authSource=admin                   // Note: stripped out the "authmechanism" param
 
-
+// Build the connection string
 private val clientConnectionString =
     "mongodb://${mongoSettings["MONGO_HOST"]}" +
             ":${mongoSettings["MONGO_PORT"]}" +
             "${mongoSettings["MONGO_HOST_POSTFIX"]}"
-
 private val credential = MongoCredential.createCredential(
     mongoSettings["MONGO_USERNAME"]!!,
     mongoSettings["MONGO_AUTH_SOURCE"]!!,
     mongoSettings["MONGO_PASSWORD"]!!.toCharArray()
 )
-
 private val client =
     MongoClientSettings
         .builder()
@@ -51,18 +50,11 @@ private val client =
         .credential(credential)
         .build()
 
-
 //private val mongoClient = KMongo.createClient(clientConnectionString).coroutine  // uses raw string
 private val mongoClient = KMongo.createClient(client).coroutine
 private val database = mongoClient.getDatabase(mongoSettings["MONGO_DB"]!!)
 private val users = database.getCollection<User>(mongoSettings["MONGO_USERS_COLLECTION"]!!)
 private val notes = database.getCollection<Note>(mongoSettings["MONGO_NOTES_COLLECTION"]!!)
-
-
-//private val client = KMongo.createClient().coroutine  // "mongodb://localhost:27017"
-//private val database = client.getDatabase("Notes_Database")
-//private val users = database.getCollection<User>("Users")
-//private val notes = database.getCollection<Note>("Notes")
 
 fun printMongoEnv() {
     runBlocking {

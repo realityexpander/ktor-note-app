@@ -1,5 +1,6 @@
 import java.sql.Time
 import java.text.SimpleDateFormat
+import groovy.transform.Field  // allow use of global strings
 
 buildscript {
     repositories {
@@ -20,9 +21,8 @@ version '0.1.5'
 mainClassName = "io.ktor.server.netty.EngineMain"
 def appManifest = manifest().effectiveManifest
 
-// TODO These should be set in the local.properties file
-def MONGO_USERNAME = "theAdmin"
-def MONGO_PASSWORD = "Zapper1000%^&"
+//@Field String mongoUsername = 'username'    // @Field allows use of global strings
+//@Field String mongoPassword = 'password'
 
 // Generate a jar file - puts results into `./root/home/release` directory
 // This directory structure reflects the server directory structure
@@ -228,6 +228,8 @@ static void writeFile(String path, String content) {
     writer.close()
 }
 
+
+
 def createStartAppScript() {
     println("•--> Create the startApp script for app version: " + version)
 
@@ -235,16 +237,21 @@ def createStartAppScript() {
     // Its because the output stream is directed to the console, not the file.
     // def cmd = "echo "hello" > ./root/home/test.txt" // won't create the test.txt file!!!
 
+    // read local.properties file for username and password
+    def localPropertiesFile = "./local.properties"
+    def localProperties = new Properties()
+    localProperties.load(new FileInputStream(localPropertiesFile))
+    def MONGO_USERNAME = localProperties['MONGO_USERNAME']
+    def MONGO_PASSWORD = localProperties['MONGO_PASSWORD']
+
     def scriptFilePath = "./root/home/startApp.sh"
     def script = """  // note: this first line is *intentionally* skipped, to conform to normal script format.
             #!/bin/bash
             # Set Temporary Environment Variables
-            eval 'export MONGO_USERNAME="${ MONGO_USERNAME.toString() }"'
-            eval 'export MONGO_PASSWORD="${ MONGO_PASSWORD.toString() }"'
-            #eval 'export MONGO_HOST=theAdmin:Zapper1000%25%5E%26@localhost' # Raw client string
+            eval 'export MONGO_USERNAME="$MONGO_USERNAME"'
+            eval 'export MONGO_PASSWORD="$MONGO_PASSWORD"'
             eval 'export MONGO_HOST=localhost'
             eval 'export MONGO_PORT=27017'
-            eval 'export MONGO_HOST_POSTFIX="/?authSource=admin"'
             eval 'export MONGO_AUTH_SOURCE=admin'
             
             echo "•--> Starting the app version ${ version.toString() }..."
@@ -259,8 +266,14 @@ def createStartAppScript() {
             }
             # Application-name: ${ project.name }
             # Application-version: ${ version.toString() }
+            # Last git commit id: ${ runCommand('git rev-parse HEAD', 1000) }
         """
-    // # Revision: ${grgit.head().abbreviatedId} // left for reference
+
+    // LEFT FOR REFERENCE
+    // # Revision: ${grgit.head().abbreviatedId}
+    // Use these for a raw client string:
+    //    #eval 'export MONGO_HOST="adminUsername:Password%25%5E%26@localhost"' # Raw client string
+    //    #eval 'export MONGO_HOST_POSTFIX="/?authSource=admin"' # Raw client string
 
     // Trim the script to remove any leading or trailing whitespace and the first line
     def trimmedScript = ""

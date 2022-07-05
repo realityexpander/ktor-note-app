@@ -261,15 +261,11 @@ package com.realityexpander
 //db.cloneDatabase(fromhost)
 //db.copyDatabase(fromdb, todb, fromhost)
 //db.createCollection(name, { size : ..., capped : ..., max : ... } )
-//
 //db.getName()
 //db.printCollectionStats()
-//
 //db.currentOp() ;displays the current operation in the db
-//
 //db.getProfilingLevel()
 //db.setProfilingLevel(level) ;0=off 1=slow 2=all
-//
 //db.getReplicationInfo()
 //db.printReplicationInfo()
 //db.printSlaveReplicationInfo()
@@ -277,9 +273,18 @@ package com.realityexpander
 //
 //db.version() ;current version of the server
 //
-// Create a user:
+// Create an admin user:
 //  use admin
-//  db.createUser({user: "user", pwd: "password", roles: [{role: "readWrite", db: "admin"}]})
+//  db.createUser({user: "theAdmin", pwd: "password", roles: [{role: "readWrite", db: "admin"}]})
+// or:
+//  db.createUser({user: "theAdmin", pwd: passwordPrompt(),
+//    roles: [
+//      { role: "userAdminAnyDatabase", db: "admin" },
+//      { role: "readWriteAnyDatabase", db: "admin" }
+//  ]})
+// Auth the user:
+//  use admin
+//  db.auth("theAdmin", passwordPrompt()) // or cleartext password
 // Show users:
 //  use admin
 //  db.system.users.find()
@@ -343,6 +348,7 @@ fun Application.module(testing: Boolean = false) {
     val rootLogger = loggerContext.getLogger("org.mongodb.driver")
     rootLogger.level = Level.WARN
 
+//    // Test to see if cyclic job can run
 //    val scheduledEventFlow = flow{
 //        while(true){
 //            delay(10000)
