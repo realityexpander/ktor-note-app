@@ -164,7 +164,7 @@ package com.realityexpander
 //   sudo ufw allow out to <ip> port <port>
 
 // Check ip ports in use:
-//   sudo netstat -peanut : grep ":8001"
+//   sudo netstat -peanut | grep ":8001"   # just look for port 8001
 //   sudo lsof -i :27017
 //   sudo lsof -i :8002
 // Get command that started a particular process:
@@ -221,7 +221,7 @@ package com.realityexpander
 // To remove the server warning: setlocale: LC_ALL: cannot change locale (en_US.UTF-8):
 //   locale-gen en_US.utf8
 
-// Kill the user session:
+// Kill a user session: (log the user out)
 //   sudo pkill -u <username>
 
 // Build commands
@@ -363,7 +363,9 @@ fun Application.module(testing: Boolean = false) {
 //        println("Email Exists = ${checkIfUserExists("test@123.com")}")
 //    }
 
-    printMongoEnv()
+
+    // Print mongo environment variables - For debugging only
+    // printMongoEnv()
 
 }
 

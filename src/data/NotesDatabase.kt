@@ -20,10 +20,10 @@ private val mongoSettings: Map<String, String> = mapOf(
     "MONGO_HOST"             to (env["MONGO_HOST"]             ?: "localhost"),
     "MONGO_HOST_POSTFIX"     to (env["MONGO_HOST_POSTFIX"]     ?: ""),
     "MONGO_PORT"             to (env["MONGO_PORT"]             ?: "27017"),
+    "MONGO_AUTH_SOURCE"      to (env["MONGO_AUTH_SOURCE"]      ?: "admin"),
     "MONGO_DB"               to (env["MONGO_DB"]               ?: "Notes_Database"),
     "MONGO_USERS_COLLECTION" to (env["MONGO_USERS_COLLECTION"] ?: "Users"),
     "MONGO_NOTES_COLLECTION" to (env["MONGO_NOTES_COLLECTION"] ?: "Notes"),
-    "MONGO_AUTH_SOURCE"      to (env["MONGO_AUTH_SOURCE"]      ?: "admin"),
 )
 
 // REFERENCE: server full client connection raw string (for app running on the server):
@@ -63,6 +63,7 @@ fun printMongoEnv() {
         println("MONGO_PASSWORD: ${mongoSettings["MONGO_PASSWORD"]}")
         println("MONGO_HOST: ${mongoSettings["MONGO_HOST"]}")
         println("MONGO_HOST_POSTFIX: ${mongoSettings["MONGO_HOST_POSTFIX"]}")
+        println("MONGO_AUTH_SOURCE: ${mongoSettings["MONGO_AUTH_SOURCE"]}")
         println("MONGO_PORT: ${mongoSettings["MONGO_PORT"]}")
         println("MONGO_DB: ${mongoSettings["MONGO_DB"]}")
         println("MONGO_USERS_COLLECTION: ${mongoSettings["MONGO_USERS_COLLECTION"]}")
@@ -75,8 +76,8 @@ fun printMongoEnv() {
         println("client password: ${client.credential?.password.contentToString()}")
         println("database: ${database.name}")
         println("databases: ${mongoClient.listDatabaseNames().toList()}")
-        println("users #docs: ${users.countDocuments()}")
-        println("notes #docs: ${notes.countDocuments()}")
+        println("users # of docs: ${users.countDocuments()}")
+        println("notes # of docs: ${notes.countDocuments()}")
         println("--- MongoDB Environment END ---")
     }
 }
