@@ -191,11 +191,13 @@ package com.realityexpander
 //   net:
 //     port: 27017
 //     bindIp: 127.0.0.1, <your-server-ip-address>
+//   security:
+//     authorization: enabled
 //
 // Restart the MongoDB service:
 //   sudo systemctl restart mongod
 
-// Log in with Mongo Compass:
+// Log in to remote service with Mongo Compass:
 //   New connection:
 //   Select <Advanced Options> twirl-down
 //   Select the <Proxy/SSH> tab
@@ -203,8 +205,14 @@ package com.realityexpander
 //   Enter the following:
 //    SSH Hostname: <your-server-ip-address>
 //    SSH Port: 22
-//    SSH Username: <your-username>   // usually 'root'
-//    SSH Password: <your-password>   // <your-password>
+//    SSH Username: <your-SSH-username>   // usually 'root'
+//    SSH Password: <your-SSH-password>   // <your-SSH-password>
+//   Select the "Authentication" tab
+//   Enter the following:
+//    Username: <your-admin-username>     // usually 'theAdmin'
+//    Password: <your-admin-password>     // <your-admin-password>
+//    Authentication Database: admin      // usually 'admin'
+//    Authentication Mechanism: Default   // usually 'Default'
 
 // Monitor IP traffic in real time:  https://linuxize.com/post/linux-watch-command/
 //   watch -d --interval 0 'iptables -nvL | grep -v "0     0"'
@@ -268,11 +276,22 @@ package com.realityexpander
 //db.repairDatabase()
 //
 //db.version() ;current version of the server
+//
+// Create a user:
+//  use admin
+//  db.createUser({user: "user", pwd: "password", roles: [{role: "readWrite", db: "admin"}]})
+// Show users:
+//  use admin
+//  db.system.users.find()
+// Remove user:
+//  use admin
+//  db.system.users.deleteOne({user: "user"})
 
 
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.LoggerContext
 import com.realityexpander.data.checkPasswordForEmail
+import com.realityexpander.data.printMongoEnv
 import com.realityexpander.routes.loginRoute
 import com.realityexpander.routes.notesRoute
 import com.realityexpander.routes.registerRoute
@@ -337,6 +356,8 @@ fun Application.module(testing: Boolean = false) {
 //    CoroutineScope(Dispatchers.IO).launch {
 //        println("Email Exists = ${checkIfUserExists("test@123.com")}")
 //    }
+
+    printMongoEnv()
 
 }
 

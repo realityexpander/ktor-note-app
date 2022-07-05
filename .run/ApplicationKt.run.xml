@@ -1,5 +1,13 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="ApplicationKt" type="JetRunConfigurationType" nameIsGenerated="true">
+    <envs>
+      <env name="MONGO_DB" value="Notes_Database" />
+      <env name="MONGO_HOST" value="localhost" />
+      <env name="MONGO_HOST_POSTFIX" value="" />
+      <env name="MONGO_NOTES_COLLECTION" value="Notes" />
+      <env name="MONGO_PORT" value="27017" />
+      <env name="MONGO_USERS_COLLECTION" value="Users" />
+    </envs>
     <option name="MAIN_CLASS_NAME" value="com.realityexpander.ApplicationKt" />
     <module name="ktor-note-app.main" />
     <shortenClasspath name="NONE" />
