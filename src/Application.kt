@@ -131,10 +131,14 @@ package com.realityexpander
 //   sudo systemctl enable ktornoteapp // enable the service to start at boot time
 
 // Show the logs & follow updates:
-//   journalctl -u ktornoteapp -f
+//   journalctl -f -u ktornoteapp
+// Show the last 50 lines & follow updates:
+//   tail -n 50 -f /var/log/syslog
+// or:
+//   journalctl -f -u ktornoteapp -n 50
 // Clear the logs from all but last 2 days:
 //   journalctl --vacuum-time=2d
-
+//
 // more options:
 //   journalctl -u ktornoteapp.service // -f to show logs from the last 24 hours, 'q' to quit
 //   journalctl -u ktornoteapp.service | grep -i error // grep for errors
@@ -146,6 +150,12 @@ package com.realityexpander
 //   journalctl -u ktornoteapp.service | grep -i error | tail -n 10 | less -R -S -X -M // show the last 10 errors in a less window, with readline support and scrollback and exit on 'q' and show the cursor at the end of the file
 //   journalctl -u ktornoteapp.service | grep -i error | tail -n 10 | less -R -S -X -M -F // show the last 10 errors in a less window, with readline support and scrollback and exit on 'q' and show the cursor at the end of the file and follow the logs
 //   journalctl -u ktornoteapp.service | grep -i error | tail -n 10 | less -R -S -X -M -F -N // show the last 10 errors in a less window, with readline support and scrollback and exit on 'q' and show the cursor at the end of the file and follow the logs and dont show the cursor
+//
+// to set the max size of the logs for the system:
+//   sudo nano /etc/systemd/journald.conf
+//     [Journal]
+//     SystemMaxUse=50M
+//   ^s^x
 
 // Disable firewall: *note: May need to restart the app service after these commands.
 //   sudo apt-get install ufw
