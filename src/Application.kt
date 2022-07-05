@@ -130,7 +130,12 @@ package com.realityexpander
 //   sudo systemctl status ktornoteapp // check if the service is running & show logs, 'q' to quit
 //   sudo systemctl enable ktornoteapp // enable the service to start at boot time
 
-// Show the logs:
+// Show the logs & follow updates:
+//   journalctl -u ktornoteapp -f
+// Clear the logs from all but last 2 days:
+//   journalctl --vacuum-time=2d
+
+// more options:
 //   journalctl -u ktornoteapp.service // -f to show logs from the last 24 hours, 'q' to quit
 //   journalctl -u ktornoteapp.service | grep -i error // grep for errors
 //   journalctl -u ktornoteapp.service | grep -i error | tail -n 10 // show the last 10 errors
@@ -166,6 +171,7 @@ package com.realityexpander
 // Check ip ports in use:
 //   sudo netstat -peanut | grep ":8001"   # just look for port 8001
 //   sudo lsof -i :27017
+//   sudo lsof -i :8001
 //   sudo lsof -i :8002
 // Get command that started a particular process:
 //   ps -fp <PID>
@@ -247,6 +253,7 @@ package com.realityexpander
 // Web url to get all notes for a specific user:
 //   http://localhost:8001/getAllNotesForEmail?email=test123@123.com
 
+// https://www.netscylla.com/blog/2018/09/13/hacking-mongodb.html
 // MongoDB commands:
 //help                         ;show help
 //show dbs                     ;show database names
@@ -273,6 +280,8 @@ package com.realityexpander
 //
 //db.version() ;current version of the server
 //
+// https://www.mongodb.com/docs/manual/tutorial/configure-scram-client-authentication/
+// https://www.guru99.com/mongodb-create-user.html
 // Create an admin user:
 //  use admin
 //  db.createUser({user: "theAdmin", pwd: "password", roles: [{role: "readWrite", db: "admin"}]})
