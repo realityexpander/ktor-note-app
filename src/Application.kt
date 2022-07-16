@@ -249,6 +249,7 @@ package com.realityexpander
 //    ./gradle getAppManifest
 
 // GOTTA BE CAREFUL WITH THE KEYS! Make sure you never check in your *.jks file to GitHub!
+//   ALSO give your mongoDb a password!
 //
 // All your data is a backed up. You must pay 0.043 BTC to 1Kz6v4B5CawcnL8jrUvHsvzQv5Yq4fbsSv
 // 48 hours for recover it. After 48 hours expiration we will leaked and exposed all your data.
