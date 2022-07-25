@@ -38,9 +38,9 @@ package com.realityexpander
 //    # Press enter twice (no passphrase needed)
 //    Your public key has been saved in /Users/chrisathanas/.ssh/hostinger_rsa.pub
 //
-//   cat /Users/chrisathanas/.ssh/hostinger_rsa.pub  # This is the public key. We need to copy the private (non-.pub) to the server.
+//   cat /Users/chrisathanas/.ssh/hostinger_rsa.pub                          # This is the public key. We need to copy the private (non-.pub) to the server.
 //   ssh-copy-id -i /Users/chrisathanas/.ssh/hostinger_rsa root@<server-ip>  # copy the private key to the server (must use password to login)
-//   ssh -i /Users/chrisathanas/.ssh/hostinger_rsa root@<server-ip> # connect to the server using the private key
+//   ssh -i /Users/chrisathanas/.ssh/hostinger_rsa root@<server-ip>          # connect to the server using the private key
 //
 // To SSH into the server without long reference to `.../.ssh/hostinger_rsa`, do the following:
 //   nano ~/.ssh/config  # & Add these lines: (to allow ssh/scp/sftp to work without supplying password)
@@ -60,6 +60,15 @@ package com.realityexpander
 
 // How to create an SSH shortcut
 //   https://www.digitalocean.com/community/tutorials/how-to-create-an-ssh-shortcut
+
+// Local dir structure (mirrored on the server):
+// root      # this is the same as root folder on the server
+//   home
+//     keys
+//       ktornoteapp.jks
+//     release
+//       app-0.X.X.jar
+//     startApp.sh
 
 // Deploy to an Ubuntu 20.04 (Focal) server: (also works with Ubuntu 18.04.6 LTS (GNU/Linux 4.15.0 x86_64))
 //
