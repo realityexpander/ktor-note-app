@@ -30,6 +30,7 @@ package com.realityexpander
 // --> For LOGIN to server.
 // To generate SSH keys for the login to server (so you don't have to type in server password every time)
 // On local terminal:
+//
 // Generate SSH keys:
 //   ssh-keygen -t rsa -m PEM
 //    Enter file in which to save the key (/Users/chrisathanas/.ssh/id_rsa):
@@ -65,7 +66,7 @@ package com.realityexpander
 // root      # this is the same as root folder on the server
 //   home
 //     keys
-//       ktornoteapp.jks
+//       ktornoteapp.jks    # keystore for the server app, allows for https traffic (self-signed)
 //     release
 //       app-0.X.X.jar
 //     startApp.sh
