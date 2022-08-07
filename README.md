@@ -1,4 +1,4 @@
-# ktor-note-app Ktor Back End
+# ktor-note-app Server Back End
 
 Ktor Backend server for "KtorNoteApp " Android mobile app: https://github.com/realityexpander/KtorNoteApp
 
