@@ -1,4 +1,4 @@
-# ktor-note-app Server Back End
+# Server Back End for Android app (ktor-note-app )
 
 Ktor Backend server for "KtorNoteApp " Android mobile app: https://github.com/realityexpander/KtorNoteApp
 
@@ -6,11 +6,11 @@ See the Ktor-Note-App Android application
 
 ## Technology used
 
-- Ktor server
+- Ktor server w/ Coroutines
 - Markup
 - MongoDB
 - Ubuntu Server
-- Custom gradle tasks to automate deploy
+- Custom gradle tasks to automate deploy to server
 - Https
 - Authentication
 - JAR Manifest parsing
