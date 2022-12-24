@@ -395,7 +395,7 @@ fun Application.module(testing: Boolean = false) {
 
 
     // Print mongo environment variables - For debugging only
-    // printMongoEnv()
+     printMongoEnv()
 
 }
 

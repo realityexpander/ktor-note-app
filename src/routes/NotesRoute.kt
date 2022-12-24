@@ -133,11 +133,11 @@ fun Route.notesRoute() {
                     val userId = getUserByEmail(email)!!.id
 
                     // Only delete the note for this userId
-                    val acknowledged = deleteNoteIdForUserId(userId, request.id)
+                    val acknowledged = deleteNoteForUser(userId, request.id)
 
                     if (acknowledged) {
                         // Check if note still exists (ie: only an owner was removed)
-                        val note = getNoteId(request.id)
+                        val note = getNote(request.id)
 
                         if (note != null) {
                             call.respond(
@@ -218,8 +218,8 @@ fun Route.notesRoute() {
                 if (ifUserIdExists(request.ownerIdToAdd)) {
 
                     // Already an owner of this note?
-                    if(isOwnerOfNoteId(request.ownerIdToAdd, request.noteId)) {
-                        val note = getNoteId(request.noteId)!!
+                    if(isOwnerOfNote(request.ownerIdToAdd, request.noteId)) {
+                        val note = getNote(request.noteId)!!
 
                         call.respond(
                             OK,
@@ -234,10 +234,10 @@ fun Route.notesRoute() {
                         return@post
                     }
 
-                    val acknowledged = addOwnerIdToNoteId(request.ownerIdToAdd, request.noteId)
+                    val acknowledged = addOwnerToNote(request.ownerIdToAdd, request.noteId)
 
                     if (acknowledged) {
-                        val note = getNoteId(request.noteId)
+                        val note = getNote(request.noteId)
 
                         if (note != null) {
                             call.respond(

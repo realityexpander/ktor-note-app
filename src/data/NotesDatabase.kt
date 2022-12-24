@@ -15,8 +15,8 @@ import org.litote.kmongo.reactivestreams.KMongo
 // Get Environment Variables
 val env: MutableMap<String, String> = System.getenv()
 private val mongoSettings: Map<String, String> = mapOf(
-    "MONGO_USERNAME"         to (env["MONGO_USERNAME"]         ?: ""),
-    "MONGO_PASSWORD"         to (env["MONGO_PASSWORD"]         ?: ""),
+    "MONGO_USERNAME"         to (env["MONGO_USERNAME"]         ?: "admin"),
+    "MONGO_PASSWORD"         to (env["MONGO_PASSWORD"]         ?: "admin"),
     "MONGO_HOST"             to (env["MONGO_HOST"]             ?: "localhost"),
     "MONGO_HOST_POSTFIX"     to (env["MONGO_HOST_POSTFIX"]     ?: ""),
     "MONGO_PORT"             to (env["MONGO_PORT"]             ?: "27017"),
@@ -38,6 +38,7 @@ private val clientConnectionString =
     "mongodb://${mongoSettings["MONGO_HOST"]}" +
             ":${mongoSettings["MONGO_PORT"]}" +
             "${mongoSettings["MONGO_HOST_POSTFIX"]}"
+//                "/test?authSource=admin"
 private val credential = MongoCredential.createCredential(
     mongoSettings["MONGO_USERNAME"]!!,
     mongoSettings["MONGO_AUTH_SOURCE"]!!,
@@ -153,7 +154,7 @@ suspend fun saveNote(note: Note): Boolean {
     }
 }
 
-suspend fun deleteNoteIdForUserId(userId: String, noteId: String): Boolean {
+suspend fun deleteNoteForUser(userId: String, noteId: String): Boolean {
     val note = notes.findOne(Note::id eq noteId, Note::owners contains userId)
         ?: run {
             println("Note with id=$noteId not found for User with id=$userId")
@@ -169,17 +170,17 @@ suspend fun deleteNoteIdForUserId(userId: String, noteId: String): Boolean {
     return notes.updateOneById(noteId, note.copy(owners = note.owners - userId)).wasAcknowledged()
 }
 
-suspend fun getNoteId(noteId: String): Note? {
+suspend fun getNote(noteId: String): Note? {
     return notes.findOne(Note::id eq noteId)
 }
 
-suspend fun addOwnerIdToNoteId(userId: String, noteId: String): Boolean {
+suspend fun addOwnerToNote(userId: String, noteId: String): Boolean {
     val note = notes.findOneById(noteId) ?: run {
         println("Note with id=$noteId not found")
         return false
     }
 
-    if (isOwnerOfNoteId(userId, noteId)) {
+    if (isOwnerOfNote(userId, noteId)) {
         println("User with id=$userId already owns note with id=$noteId")
         return false
     }
@@ -187,7 +188,7 @@ suspend fun addOwnerIdToNoteId(userId: String, noteId: String): Boolean {
     return notes.updateOneById(noteId, note.copy(owners = note.owners + userId)).wasAcknowledged()
 }
 
-suspend fun isOwnerOfNoteId(userId: String, noteId: String): Boolean {
+suspend fun isOwnerOfNote(userId: String, noteId: String): Boolean {
     val note = notes.findOneById(noteId) ?: run {
         println("Note with id=$noteId not found")
         return false

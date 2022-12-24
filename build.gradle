@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 import java.sql.Time
 import java.text.SimpleDateFormat
 import groovy.transform.Field  // allow use of global strings
@@ -66,7 +68,7 @@ repositories {
 }
 
 // Compiling for JVM 1.8
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+tasks.withType(KotlinCompile).configureEach {
     kotlinOptions {
         jvmTarget = "1.8"
     }
